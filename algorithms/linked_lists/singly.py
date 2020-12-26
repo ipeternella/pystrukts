@@ -30,6 +30,12 @@ class LinkedList(Generic[T]):
         return self.length
 
     def __iter__(self) -> Generator:
+        """
+        Traverses the whole linked list.
+
+        Time Complexity: O(N)
+        """
+
         if self.is_empty():
             raise StopIteration
 
@@ -69,6 +75,8 @@ class LinkedList(Generic[T]):
     def insert_right(self, item: T) -> None:
         """
         Inserts a new item at the END (right-side) of the linked list.
+
+        Time Complexity: O(1)
         """
         new_node = Node(item)  # no next reference: it's the end of the linked list!
 
