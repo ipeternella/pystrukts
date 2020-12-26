@@ -7,6 +7,7 @@ from typing import Optional
 from typing import TypeVar
 
 from algorithms.data_containers.node_single_reference import Node
+from algorithms.linked_lists.exceptions import EmptyLinkedList
 
 T = TypeVar("T")
 
@@ -44,3 +45,24 @@ class LinkedList(Generic[T]):
 
             self.first_node = new_node
             self.length += 1
+
+    def pop(self) -> T:
+        """
+        Removes the first node of the linked list.
+        """
+        if self.is_empty():
+            raise EmptyLinkedList("Cannot remove items from an empty linked list.")
+
+        removed_item: T = self.first_node.item  # type: ignore
+
+        if self.length == 1:
+            self.first_node = None
+            self.length -= 1
+
+            return removed_item
+
+        second_node = self.first_node.next  # type: ignore
+        self.first_node = second_node
+        self.length -= 1
+
+        return removed_item
