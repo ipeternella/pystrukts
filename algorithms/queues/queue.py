@@ -19,13 +19,13 @@ class Queue(Generic[T]):
     singly linked list implementation.
     """
 
-    internal_linked_list: LinkedList[T]
+    _linked_list: LinkedList[T]
 
     def __init__(self) -> None:
-        self.internal_linked_list = LinkedList()
+        self._linked_list = LinkedList()
 
     def __len__(self) -> int:
-        return len(self.internal_linked_list)
+        return len(self._linked_list)
 
     def __iter__(self) -> Generator:
         """
@@ -34,8 +34,8 @@ class Queue(Generic[T]):
 
         Time complexity: O(1)
         """
-        for item in self.internal_linked_list:
-            yield self.internal_linked_list.pop()
+        for item in self._linked_list:
+            yield self._linked_list.pop()
 
     def enqueue(self, item: T) -> None:
         """
@@ -44,7 +44,7 @@ class Queue(Generic[T]):
 
         Time complexity: O(1)
         """
-        self.internal_linked_list.insert_right(item)  # FIFO fashion: new items go to the end
+        self._linked_list.insert_right(item)  # FIFO fashion: new items go to the end
 
     def dequeue(self) -> T:
         """
@@ -53,8 +53,8 @@ class Queue(Generic[T]):
         Time complexity: O(1)
         """
         try:
-            dequeued_item = self.internal_linked_list.pop()  # removes from the linked list
+            dequeued_item = self._linked_list.pop()  # removes from the linked list
         except EmptyLinkedList:
-            raise EmptyQueue("Cannot remove items from an empty queue.")
+            raise EmptyQueue("Cannot dequeue items from an empty queue.")
 
         return dequeued_item

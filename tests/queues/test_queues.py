@@ -35,7 +35,6 @@ def test_should_enqueue_and_dequeue_items():
     assert q.dequeue() == "second"
     assert q.dequeue() == "third"
     assert len(q) == 0
-    q.dequeue()
 
     # act: readd some elements
     q.enqueue("fourth")

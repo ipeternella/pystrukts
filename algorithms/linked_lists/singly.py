@@ -18,16 +18,16 @@ class LinkedList(Generic[T]):
     A singly linked list implementation.
     """
 
-    length: int
-    first_node: Optional[Node]
-    last_node: Optional[Node]
+    _length: int
+    _first_node: Optional[Node]
+    _last_node: Optional[Node]
 
     def __init__(self) -> None:
-        self.length = 0
-        self.first_node = None
+        self._length = 0
+        self._first_node = None
 
     def __len__(self) -> int:
-        return self.length
+        return self._length
 
     def __iter__(self) -> Generator:
         """
@@ -39,7 +39,7 @@ class LinkedList(Generic[T]):
         if self.is_empty():
             raise StopIteration
 
-        current_node = self.first_node
+        current_node = self._first_node
 
         while current_node is not None:
             yield current_node.item  # using generators to facilitate the iteration state
@@ -51,7 +51,7 @@ class LinkedList(Generic[T]):
 
         Time Complexity: O(1)
         """
-        return self.length == 0
+        return self._length == 0
 
     def insert(self, item: T) -> None:
         """
@@ -62,15 +62,15 @@ class LinkedList(Generic[T]):
         if self.is_empty():
             new_node = Node(item)
 
-            self.first_node = new_node
-            self.last_node = new_node
+            self._first_node = new_node
+            self._last_node = new_node
         else:
             # last_node remains as is: nothing changes for left insertions.
-            new_node = Node(item, self.first_node)
+            new_node = Node(item, self._first_node)
 
-            self.first_node = new_node
+            self._first_node = new_node
 
-        self.length += 1
+        self._length += 1
 
     def insert_right(self, item: T) -> None:
         """
@@ -81,14 +81,14 @@ class LinkedList(Generic[T]):
         new_node = Node(item)  # no next reference: it's the end of the linked list!
 
         if self.is_empty():
-            self.first_node = new_node
-            self.last_node = new_node
+            self._first_node = new_node
+            self._last_node = new_node
         else:
             # first_node remains as is: nothing changes for right insertions.
-            self.last_node.next = new_node  # type: ignore
-            self.last_node = new_node  # updates last_node reference
+            self._last_node.next = new_node  # type: ignore
+            self._last_node = new_node  # updates last_node reference
 
-        self.length += 1
+        self._length += 1
 
     def pop(self) -> T:
         """
@@ -99,17 +99,17 @@ class LinkedList(Generic[T]):
         if self.is_empty():
             raise EmptyLinkedList("Cannot remove items from an empty linked list.")
 
-        removed_item: T = self.first_node.item  # type: ignore
+        removed_item: T = self._first_node.item  # type: ignore
 
-        if self.length == 1:
-            self.first_node = None
-            self.last_node = None
-            self.length -= 1
+        if self._length == 1:
+            self._first_node = None
+            self._last_node = None
+            self._length -= 1
 
             return removed_item
 
-        second_node = self.first_node.next  # type: ignore
-        self.first_node = second_node
-        self.length -= 1
+        second_node = self._first_node.next  # type: ignore
+        self._first_node = second_node
+        self._length -= 1
 
         return removed_item
