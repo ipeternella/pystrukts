@@ -1,0 +1,28 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+# Coding tools
+mypy = "*"
+flake8 = "*"
+black = "20.8b1"
+isort = "*"
+
+# Testing tools
+tox = "*"
+pytest = "*"
+pytest-cov = "*"
+
+[packages]
+# Util functions
+requests = "*"
+
+[scripts]
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true  # for black (! care for updates)
