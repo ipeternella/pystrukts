@@ -2,6 +2,7 @@
 Module with implementations related to linked lists (singly, doubly, etc.).
 """
 
+from typing import Generator
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
@@ -27,15 +28,29 @@ class LinkedList(Generic[T]):
     def __len__(self) -> int:
         return self.length
 
+    def __iter__(self) -> Generator:
+        if self.is_empty():
+            raise StopIteration
+
+        current_node = self.first_node
+
+        while current_node is not None:
+            yield current_node.item  # using generators to facilitate the iteration state
+            current_node = current_node.next
+
     def is_empty(self) -> bool:
         """
         Checks if the linked list is empty or not.
+
+        Time Complexity: O(1)
         """
         return self.length == 0
 
     def insert(self, item: T) -> None:
         """
-        Inserts a new item at the BEGINNING of the linked list.
+        Inserts a new item at the BEGINNING (left-side) of the linked list.
+
+        Time Complexity: O(1)
         """
         if self.is_empty():
             self.first_node = Node(item)
@@ -49,6 +64,8 @@ class LinkedList(Generic[T]):
     def pop(self) -> T:
         """
         Removes the first node of the linked list.
+
+        Time Complexity: O(1)
         """
         if self.is_empty():
             raise EmptyLinkedList("Cannot remove items from an empty linked list.")

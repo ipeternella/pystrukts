@@ -84,3 +84,17 @@ def test_should_pop_element_from_linked_list_with_two_elements():
     assert removed_item == "world"
     assert len(linked_list) == 0
     assert linked_list.is_empty() is True
+
+
+def test_should_traverse_linked_list():
+    # arrange
+    linked_list: LinkedList[str] = LinkedList()
+    linked_list.insert("!")
+    linked_list.insert("world")
+    linked_list.insert("hello")  # this is the first node now
+
+    # act
+    nodes = [node for node in linked_list]
+
+    # assert
+    assert nodes == ["hello", "world", "!"]
