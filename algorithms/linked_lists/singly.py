@@ -20,6 +20,7 @@ class LinkedList(Generic[T]):
 
     length: int
     first_node: Optional[Node]
+    last_node: Optional[Node]
 
     def __init__(self) -> None:
         self.length = 0
@@ -53,13 +54,33 @@ class LinkedList(Generic[T]):
         Time Complexity: O(1)
         """
         if self.is_empty():
-            self.first_node = Node(item)
-            self.length += 1
+            new_node = Node(item)
+
+            self.first_node = new_node
+            self.last_node = new_node
         else:
+            # last_node remains as is: nothing changes for left insertions.
             new_node = Node(item, self.first_node)
 
             self.first_node = new_node
-            self.length += 1
+
+        self.length += 1
+
+    def insert_right(self, item: T) -> None:
+        """
+        Inserts a new item at the END (right-side) of the linked list.
+        """
+        new_node = Node(item)  # no next reference: it's the end of the linked list!
+
+        if self.is_empty():
+            self.first_node = new_node
+            self.last_node = new_node
+        else:
+            # first_node remains as is: nothing changes for right insertions.
+            self.last_node.next = new_node  # type: ignore
+            self.last_node = new_node  # updates last_node reference
+
+        self.length += 1
 
     def pop(self) -> T:
         """
@@ -74,6 +95,7 @@ class LinkedList(Generic[T]):
 
         if self.length == 1:
             self.first_node = None
+            self.last_node = None
             self.length -= 1
 
             return removed_item
