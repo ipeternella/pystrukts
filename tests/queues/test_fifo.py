@@ -4,7 +4,7 @@ Module with tests for the queue (FIFO) data structures.
 import pytest
 
 from algorithms.queues.exceptions import EmptyQueue
-from algorithms.queues.queue import Queue
+from algorithms.queues.fifo import Queue
 
 
 def test_should_enqueue_and_assert_queue_length():
@@ -60,7 +60,7 @@ def test_should_traverse_queue_without_dequeing_items():
     dequeued_items = [item for item in q]
 
     # assert
-    assert dequeued_items == ["first", "second", "third"]
+    assert dequeued_items == ["first", "second", "third"]  # FIFO dynamic
     assert len(q) == 0
 
 

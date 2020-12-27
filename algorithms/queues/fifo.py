@@ -32,7 +32,7 @@ class Queue(Generic[T]):
         Traverses all the items of the queue by traversing the internal linked list.
         Warning: this operation DEQUEUES the items from the queue.
 
-        Time complexity: O(1)
+        Time complexity: O(N)
         """
         for item in self._linked_list:
             yield self._linked_list.pop()
