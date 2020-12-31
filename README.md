@@ -1,3 +1,10 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=alert_status)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=security_rating)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=bugs)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=sqale_index)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
+
 # Algorithms and Data Structures
 
 🔬 A repo with Pythonic implementations of some algorithms and their underlying data structures. 🧪
