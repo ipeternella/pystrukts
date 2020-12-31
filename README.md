@@ -1,3 +1,4 @@
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=alert_status)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ipeternella_algorithms&metric=security_rating)](https://sonarcloud.io/dashboard?id=ipeternella_algorithms)
