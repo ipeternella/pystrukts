@@ -130,3 +130,6 @@ dmypy.json
 
 # Tests
 test-results.xml
+
+# Sonnar
+.scannerwork

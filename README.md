@@ -20,6 +20,7 @@ The following classical algorithms are covered by this repo and written in moder
   - [Stacks](#stacks)
 - [Searching Algorithms](#searching-algorithms)
   - [Binary Search For Lists](#binary-search-for-lists)
+- [Running tests locally with Sonar](#running-tests-with-sonar)
 
 ## Fundamental Algorithms
 
@@ -62,3 +63,46 @@ We begin the section of algorithms by considering the classic binary search and 
 The efficient searching algorithm for sorted lists is covered here.
 
 Algorithm implementation [here](algorithms/searching/binary_search.py)
+
+## Running Tests with Sonar
+
+This project supports running `sonarqube` analysis by creating docker local containers via `docker-compose` commands which execute the instructions on the [docker-compose.yml](docker-compose.yml) file.
+
+- `sonar server`: brings up the `sonarqube` server which is used for the code and code coverage analysis
+- `sonar scanner`: container which contains the `sonar-scanner` cli
+- `tests`: container which runs the projec tests
+
+The first step is to bring up the `sonar server`:
+
+```bash
+docker-compose up sonar_server  # authenticate on localhost:9000 and create an auth token there
+```
+
+If it's the first time running the `sonar server`, go to `http:localhost:9000` and use the credentials `admin:admin (user:password)` to login. Also, a token will be generated for authenticating with this local sonar server on later steps such as: `c11361e5ce0719a8be5249dcc329f31` (example). Write this token down for later steps.
+
+After that, we should run the project tests or the sonar analysis will be incomplete. For that, run:
+
+```bash
+docker-compose up tests  # will generate, via volume mounts, coverage.xml and test-results.xml files
+```
+
+This will generate `coverage.xml` and `test-results.xml` files required by sonar. One **very important** thing is that the `coverage.xml` will contain the test paths using absolute paths like `/app/algorithms`. As a consequence, we must put all of our source code in an `/app` folder inside the `sonar_scanner` container. This is crucial for the `sonar_scanner` to be able to understand the coverage paths on the analysis. The following `docker-compose.yml` snippet shows this mechanism:
+
+```yml
+sonar_scanner:
+  container_name: algorithms_sonar_scanner
+  image: sonarsource/sonar-scanner-cli:latest
+  environment:
+    - SONAR_HOST_URL=http://sonar:9000
+  working_dir: /app # this is the same /app folder in which the tests are run!
+  volumes:
+    - .:/app # coverage.xml results filepath must begin with '/app'
+```
+
+As a final step, we run the sonar analysis by running the `sonar_scanner` service which will capture our source code via volumes and send to the sonar server. Now, we execute a `docker-compose run` command by passing the auth token that we noted in the previous steps, and that's it:
+
+```bash
+docker-compose run -e SONAR_LOGIN="c11361e5ce0719a8be5249dcc329f31" sonar_scanner  # change with your local auth token
+```
+
+Now, just navigate to `http://localhost:9000` (sonar server page) and check out your code quality!

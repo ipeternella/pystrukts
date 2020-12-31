@@ -1,0 +1,30 @@
+version: "3.8"
+
+x-build: &dockerfile-dev-build
+  context: .
+  dockerfile: Dockerfile.dev
+
+services:
+  sonar_server:
+    container_name: algorithms_sonar_server
+    image: sonarqube:latest
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    ports:
+      - "9000:9000"
+
+  sonar_scanner:
+    container_name: algorithms_sonar_scanner
+    image: sonarsource/sonar-scanner-cli:latest
+    environment:
+      - SONAR_HOST_URL=http://sonar:9000
+    working_dir: /app
+    volumes:
+      - .:/app # coverage.xml results filepath must begin with '/app'
+
+  tests:
+    container_name: algorithm_tests
+    build: *dockerfile-dev-build
+    volumes:
+      - .:/app
+    command: ["./scripts/start-tests.sh"] # generates 'coverage.xml' with filepath beginning with '/app'
