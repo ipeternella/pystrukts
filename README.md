@@ -99,6 +99,8 @@ sonar_scanner:
     - .:/app # coverage.xml results filepath must begin with '/app'
 ```
 
+`PS`: if `pytest` runs with `--cov=.` option, this is `/app` consideration is not really required as `sonar_scanner` will just raise a `WARN` but will understand the `coverage.xml` in anyway. However, as this project runs `pytest --cov=algorithms`, this changes the `coverage.xml` source path in a way that we the `/app` convention is not followed, `sonar_scanner` will raise `ERRORs` and will NOT perform any coverage analysis. Hence, the `/app` attention is required for this project.
+
 As a final step, we run the sonar analysis by running the `sonar_scanner` service which will capture our source code via volumes and send to the sonar server. Now, we execute a `docker-compose run` command by passing the auth token that we noted in the previous steps, and that's it:
 
 ```bash
