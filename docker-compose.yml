@@ -5,7 +5,7 @@ x-build: &dockerfile-dev-build
   dockerfile: Dockerfile.dev
 
 services:
-  sonar_server:
+  sonar:
     container_name: algorithms_sonar_server
     image: sonarqube:latest
     environment:
