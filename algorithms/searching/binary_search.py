@@ -1,31 +1,20 @@
 """
 Binary search algorithm to be used with python lists.
 """
-from abc import ABCMeta
-from abc import abstractmethod
-from typing import Any
 from typing import List
-from typing import Optional
-from typing import TypeVar
+
+from algorithms.searching.exceptions import KeyErrorWithRank
+from algorithms.searching.types import KT
 
 
-class UpperBoundComparableType(metaclass=ABCMeta):
-    """
-    Upper-bound generic type which implements a comparison protocol.
-    """
-
-    @abstractmethod
-    def __lt__(self, other: Any) -> bool:
-        pass
-
-
-T = TypeVar("T", bound=UpperBoundComparableType)
-
-
-def binary_search_index(key: T, values: List[T]) -> Optional[int]:
+def binary_search_index(key: KT, values: List[KT]) -> int:
     """
     Non-recursive binary search implementation which can be used to find a key's index on
-    a List. Returns None if the key was not found in the list.
+    a List.
+
+    Raises KeyError if the key was not found together with the final low value
+    which ended up as low > high. This value is also known as the 'rank' of the searched key,
+    and means the amount of less keys than the searched key.
 
     Time complexity: O(logN)
     """
@@ -43,4 +32,4 @@ def binary_search_index(key: T, values: List[T]) -> Optional[int]:
         else:
             return mid  # gotcha!
 
-    return None
+    raise KeyErrorWithRank(low, str(key))
