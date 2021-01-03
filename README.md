@@ -37,8 +37,8 @@ Algorithm implementation [here](algorithms/linked_lists/singly.py)
 
 Queues (FIFO -- First in, first Out -- data structures) are built here on top of the [singly linked list](#singly-linked-list) implementation because singly linked lists allows the following efficient operations:
 
-- O(1) time complexity for insertions at the **end** of the list
-- O(1) time complexity for removal (pop) of the first element of the list
+- `O(1)` time complexity for insertions at the **end** of the list
+- `O(1)` time complexity for removal (pop) of the first element of the list
 
 Such efficient operations are required by FIFO data structures.
 
@@ -48,8 +48,8 @@ Algorithm implementation [here](algorithms/queues/fifo.py)
 
 Stacks (LIFO -- Last in, first out -- data structures) are also built here on top of the [singly linked list](#singly-linked-list) data structures due to the efficient operations of the following operations:
 
-- O(1) time complexity for insertions at the **beginning** of the list;
-- O(1) time complexity for removal (pop) of the first element of the list
+- `O(1)` time complexity for insertions at the **beginning** of the list
+- `O(1)` time complexity for removal (pop) of the first element of the list
 
 Such efficient operations are requried by LIFO data structures.
 
@@ -70,7 +70,8 @@ Algorithm implementation [here](algorithms/searching/binary_search.py)
 Also known as `Symbol tables`, a simple dictionary implementation has been created using two parallel lists. The most important methods time complexity are as follows:
 
 - `get(key, default)`: time complexity is `O(logN)` due to binary search
-- `put(key, value)`: time complexity is `O(N)` for inserts, and `O(1)` for updates. Hence, for M new key inserts we have: `O(M*N)` time complexity.
+- `put(key, value)`: time complexity is `O(N)` for inserts (worst case due to whole array reallocation), and `O(1)` for updates. Hence, for M new key inserts we have: `O(M*N)` time complexity
+- `pop(key)`: time complexity is `O(N)` (worst case due to whole array reallocation)
 
 Algorithm implementation [here](algorithms/searching/dictionaries/parallel_lists.py)
 
