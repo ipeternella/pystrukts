@@ -6,8 +6,6 @@ from typing import Generic
 from typing import List
 from typing import Optional
 
-from _pytest.config import exceptions
-
 from algorithms.searching.binary_search import binary_search_index
 from algorithms.searching.exceptions import KeyErrorWithRank
 from algorithms.searching.types import KT
