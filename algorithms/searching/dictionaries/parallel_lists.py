@@ -4,6 +4,9 @@ one for the values. Uses binary search for findings keys efficiently.
 """
 from typing import Generic
 from typing import List
+from typing import Optional
+
+from _pytest.config import exceptions
 
 from algorithms.searching.binary_search import binary_search_index
 from algorithms.searching.exceptions import KeyErrorWithRank
@@ -17,7 +20,8 @@ class OrderedDict(Generic[KT, VT]):
     kept 'in order' in order to benefit from binary search's efficiency O(logN) and not require linear scans O(N).
     """
 
-    # parallel lists
+    # two parallel lists
+    _length: int
     _keys: List[KT]
     _values: List[VT]
 
@@ -27,7 +31,42 @@ class OrderedDict(Generic[KT, VT]):
         self._values = []
 
     def __len__(self) -> int:
-        return len(self._keys)
+        return self._length
+
+    def _upsert(self, key: KT, value: VT, index: int) -> bool:
+        """
+        Upserts (inserts or updates) a key and a value. Returns True in case
+        of an update.
+
+        Time complexity: O(N) - inserts
+        Time complexity: O(1) - updates
+        """
+        if self._keys[index] == key:
+            self._update(value, index)
+            return True
+
+        self._insert(key, value, index)
+        return False
+
+    def _insert(self, key: KT, value: VT, index: int) -> None:
+        """
+        Inserts or updates a key and value into their respective lists. Increases
+        the lists sizes in case of inserts.
+
+        Time complexity: O(N)
+        """
+        self._length += 1
+        self._keys.insert(index, key)
+        self._values.insert(index, value)
+
+    def _update(self, value: VT, index: int) -> None:
+        """
+        Updates a value of a given key that already exists in the dictionary. Does
+        not increase the list sizes.
+
+        Time complexity: O(1)
+        """
+        self._values[index] = value
 
     def is_empty(self) -> bool:
         """
@@ -35,7 +74,7 @@ class OrderedDict(Generic[KT, VT]):
 
         Time Complexity: O(1)
         """
-        return len(self._keys) == 0
+        return self._length == 0
 
     def rank(self, key: KT) -> int:
         """
@@ -50,17 +89,33 @@ class OrderedDict(Generic[KT, VT]):
 
         return key_rank
 
-    def get(self, key: KT) -> VT:
+    def get(self, key: KT, default_value: Optional[VT] = None) -> Optional[VT]:
         """
         Gets a key from the dictionary collection. Raises KeyErrorWithRank if the key is not found which
         contains the searched key's rank.
+
+        Time Complexity: O(logN)
         """
-        key_rank = binary_search_index(key, self._keys)
+        try:
+            key_rank = binary_search_index(key, self._keys)
+        except KeyErrorWithRank:
+            return default_value
 
         return self._values[key_rank]
 
-    def put(self, key: KT) -> None:
+    def put(self, key: KT, value: VT) -> bool:
         """
-        Puts a new key in the dictionary in a sorted way to keep the keys ordered for binary search.
+        Puts (inserts or updates) a new key in the dictionary in a sorted way to keep the keys ordered for
+        binary search. Returns True if a key has been updated and False otherwise.
+
+        Time complexity: O(N) - updates
+        Time complexity: O(1) - inserts
         """
-        pass
+        rank = self.rank(key)
+
+        if rank == 0 and self.is_empty() or rank == self._length:
+            self._insert(key, value, rank)
+            return False
+
+        else:
+            return self._upsert(key, value, rank)
