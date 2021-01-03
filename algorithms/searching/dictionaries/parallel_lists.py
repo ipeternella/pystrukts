@@ -31,21 +31,6 @@ class OrderedDict(Generic[KT, VT]):
     def __len__(self) -> int:
         return self._length
 
-    def _upsert(self, key: KT, value: VT, index: int) -> bool:
-        """
-        Upserts (inserts or updates) a key and a value. Returns True in case
-        of an update.
-
-        Time complexity: O(N) - inserts
-        Time complexity: O(1) - updates
-        """
-        if self._keys[index] == key:
-            self._update(value, index)
-            return True
-
-        self._insert(key, value, index)
-        return False
-
     def _insert(self, key: KT, value: VT, index: int) -> None:
         """
         Inserts or updates a key and value into their respective lists. Increases
@@ -111,11 +96,12 @@ class OrderedDict(Generic[KT, VT]):
         """
         rank = self.rank(key)
 
-        if (rank == 0 and self.is_empty()) or rank == self._length:  # insert-only cases
+        if self.is_empty() or rank == self._length or self._keys[rank] != key:  # insert-only cases
             self._insert(key, value, rank)
             return False
 
-        return self._upsert(key, value, rank)  # insert or update (upsert) cases
+        self._update(value, rank)  # insert or update (upsert) cases
+        return True
 
     def pop(self, key: KT) -> VT:
         """
