@@ -106,8 +106,8 @@ class OrderedDict(Generic[KT, VT]):
         Puts (inserts or updates) a new key in the dictionary in a sorted way to keep the keys ordered for
         binary search. Returns True if a key has been updated and False otherwise.
 
-        Time complexity: O(N) - updates
-        Time complexity: O(1) - inserts
+        Time complexity: O(N) - inserts
+        Time complexity: O(1) - updates
         """
         rank = self.rank(key)
 

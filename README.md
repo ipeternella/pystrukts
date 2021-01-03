@@ -20,6 +20,7 @@ The following classical algorithms are covered by this repo and written in moder
   - [Stacks](#stacks)
 - [Searching Algorithms](#searching-algorithms)
   - [Binary Search For Lists](#binary-search-for-lists)
+  - [Ordered Dictionary with two parallel lists](#ordered-dictionary-with-two-parallel-lists)
 - [Running tests locally with Sonar](#running-tests-with-sonar)
 
 ## Fundamental Algorithms
@@ -64,6 +65,15 @@ The efficient searching algorithm for sorted lists is covered here.
 
 Algorithm implementation [here](algorithms/searching/binary_search.py)
 
+### Ordered Dictionary with two parallel lists
+
+Also known as `Symbol tables`, a simple dictionary implementation has been created using two parallel lists. The most important methods time complexity are as follows:
+
+- `get(key, default)`: time complexity is `O(logN)` due to binary search
+- `put(key, value)`: time complexity is `O(N)` for inserts, and `O(1)` for updates. Hence, for M new key inserts we have: `O(M*N)` time complexity.
+
+Algorithm implementation [here](algorithms/searching/dictionaries/parallel_lists.py)
+
 ## Running Tests with Sonar
 
 This project supports running `sonarqube` analysis by creating docker local containers via `docker-compose` commands which execute the instructions on the [docker-compose.yml](docker-compose.yml) file.
@@ -104,7 +114,7 @@ sonar_scanner:
 As a final step, we run the sonar analysis by running the `sonar_scanner` service which will capture our source code via volumes and send to the sonar server. Now, we execute a `docker-compose run` command by passing the auth token that we noted in the previous steps, and that's it:
 
 ```bash
-docker-compose run -e SONAR_LOGIN="c11361e5ce0719a8be5249dcc329f31" sonar_scanner  # change with your local auth token
+docker-compose run -e SONAR_LOGIN=c11361e5ce0719a8be5249dcc329f31 sonar_scanner  # change with your local auth token
 ```
 
 Now, just navigate to `http://localhost:9000` (sonar server page) and check out your code quality!
