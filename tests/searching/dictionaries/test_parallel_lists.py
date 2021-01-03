@@ -98,3 +98,39 @@ def test_should_insert_bigger_keys_in_ordered_dict():
     # assert: new key is added
     assert d.get("c1") == 20
     assert len(d) == 5
+
+
+def test_should_insert_and_pop_key_from_ordered_dict_parallel_lists():
+    # arrange
+    d: OrderedDict[str, int] = OrderedDict()
+
+    d.put("a", 1)
+    d.put("b", 2)
+    d.put("c", 3)
+
+    assert len(d) == 3
+
+    # act and assert
+    assert d.pop("c") == 3
+    assert d.pop("a") == 1
+    assert d.pop("b") == 2
+    assert len(d) == 0
+
+    with pytest.raises(KeyErrorWithRank):
+        d.pop("d")  # nonexistent key
+
+    # act and assert: remove previously removed key
+    with pytest.raises(KeyErrorWithRank):
+        d.pop("a")
+
+    # act: add some new keys and remove
+    d.put("d", 4)
+    d.put("b", -1)
+
+    assert len(d) == 2
+
+    # assert last removes
+    assert d.pop("b") == -1
+    assert d.pop("d") == 4
+    assert len(d) == 0
+    assert d.is_empty() is True

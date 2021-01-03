@@ -53,9 +53,9 @@ class OrderedDict(Generic[KT, VT]):
 
         Time complexity: O(N)
         """
-        self._length += 1
         self._keys.insert(index, key)
         self._values.insert(index, value)
+        self._length += 1
 
     def _update(self, value: VT, index: int) -> None:
         """
@@ -106,14 +106,31 @@ class OrderedDict(Generic[KT, VT]):
         Puts (inserts or updates) a new key in the dictionary in a sorted way to keep the keys ordered for
         binary search. Returns True if a key has been updated and False otherwise.
 
-        Time complexity: O(N) - inserts
+        Time complexity: O(N) - inserts in worst case scenario due to insert()'s reallocation
         Time complexity: O(1) - updates
         """
         rank = self.rank(key)
 
-        if rank == 0 and self.is_empty() or rank == self._length:
+        if (rank == 0 and self.is_empty()) or rank == self._length:  # insert-only cases
             self._insert(key, value, rank)
             return False
 
-        else:
-            return self._upsert(key, value, rank)
+        return self._upsert(key, value, rank)  # insert or update (upsert) cases
+
+    def pop(self, key: KT) -> VT:
+        """
+        Pops (removes) a key and its corresponding value from the dictionary. If the key is not found, it
+        raises an exception.
+
+        Time complexity: O(N) - worst case scenario due to pop()'s reallocation.
+        """
+        rank = self.rank(key)
+
+        if self.is_empty() or rank == self._length or self._keys[rank] != key:
+            raise KeyErrorWithRank(rank, str(key))
+
+        removed_value = self._values.pop(rank)
+        self._keys.pop(rank)
+        self._length -= 1
+
+        return removed_value
