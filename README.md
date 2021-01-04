@@ -29,11 +29,15 @@ The following fundamental algorithms are considered fundamental as they are the 
 
 ### Singly Linked List
 
+![Singly Linked List](docs/assets/img/singly-linked-list.png)
+
 Singly linked lists are covered and are built on top of a [single reference node](algorithms/data_containers/node_single_reference.py) which is used as a basic data container. By single reference node we mean a node that only holds one reference which is the to the next node in the list. Moreover, we consider linked lists that sustain a reference to the first and last nodes of the list which can be very useful to allow efficient operations on both edges of the list (this is the base for queues and stacks as well).
 
 Algorithm implementation [here](algorithms/linked_lists/singly.py)
 
 ### Queues
+
+![Queue With Singly Linked List](docs/assets/img/queue-singly-linked-list.png)
 
 Queues (FIFO -- First in, first Out -- data structures) are built here on top of the [singly linked list](#singly-linked-list) implementation because singly linked lists allows the following efficient operations:
 
@@ -45,6 +49,8 @@ Such efficient operations are required by FIFO data structures.
 Algorithm implementation [here](algorithms/queues/fifo.py)
 
 ### Stacks
+
+![Stack With Singly Linked List](docs/assets/img/stack-singly-linked-list.png)
 
 Stacks (LIFO -- Last in, first out -- data structures) are also built here on top of the [singly linked list](#singly-linked-list) data structures due to the efficient operations of the following operations:
 
