@@ -10,14 +10,15 @@ from typing import Optional
 from typing import Set
 from typing import TypeVar
 
+from algorithms.graphs.exceptions import VertexNotFoundError
+
 T = TypeVar("T")
 
 
 class Graph(Generic[T]):
     """
-    A Graph implementation using adjacent sets and hashmaps (symbol tables). An adjacency list could have
-    been used instead of the set but there would be a penalty for traversing the lists for checking for vertex
-    duplicates.
+    A Graph implementation using adjacent sets and hashmaps (symbol tables). An adjacency list is used
+    to prevent repeated edges between vertices (parallel edges).
     """
 
     _vertices_count: int  # total amount of vertices (nodes)
@@ -41,6 +42,22 @@ class Graph(Generic[T]):
 
         return new_adj_set
 
+    @property
+    def vertices(self) -> int:
+        return self._vertices_count
+
+    @property
+    def edges(self) -> int:
+        return self._edges_count
+
+    def adjacent(self, vertex: T) -> Set[T]:
+        adj_set = self._get_adjacent_set(vertex)
+
+        if adj_set is None:
+            raise VertexNotFoundError(vertex)
+
+        return adj_set
+
     def add_edge(self, vertex_1: T, vertex_2: T) -> None:
         adj_set_1 = self._get_adjacent_set(vertex_1)
         adj_set_2 = self._get_adjacent_set(vertex_2)
@@ -60,3 +77,6 @@ class Graph(Generic[T]):
 
         adj_set_1.add(vertex_2)
         adj_set_2.add(vertex_1)
+
+    def __len__(self) -> int:
+        return self._vertices_count
