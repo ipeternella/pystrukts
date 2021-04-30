@@ -1,6 +1,6 @@
 """
-Module with Graph implementations using adjacent sets (faster than adjacency lists) along with hashmaps (symbol tables)
-in order to allow graph vertices to have diff types than traditional integer values.
+Module with Graph implementations using adjacent sets (faster than adjacency lists) along with hashmaps
+(symbol tables) in order to allow graph vertices to have diff types than traditional integer values.
 """
 from __future__ import annotations
 
