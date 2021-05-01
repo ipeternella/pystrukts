@@ -21,6 +21,8 @@ The following classical algorithms are covered by this repo and written in moder
 - [Searching Algorithms](#searching-algorithms)
   - [Binary Search For Lists](#binary-search-for-lists)
   - [Ordered Dictionary with two parallel lists](#ordered-dictionary-with-two-parallel-lists)
+- [Graph Algorithms](#graph-algorithms)
+  - [Undirected Graphs with Adjacent Sets](#undirected-graphs-with-adjacent-sets)
 - [Running tests locally with Sonar](#running-tests-with-sonar)
 
 ## Fundamental Algorithms
@@ -80,6 +82,38 @@ Also known as `Symbol tables`, a simple dictionary implementation has been creat
 - `pop(key)`: time complexity is `O(N)` (worst case due to whole array reallocation)
 
 Algorithm implementation [here](algorithms/searching/dictionaries/parallel_lists.py)
+
+## Graph Algorithms
+
+A `graph` is a set of `vertices` and a collection of `edges` that each connect a pair of `vertices`. Hence, `trees` can be considered acyclic `graphs` but not the other way around (trees are a "subset" of graphs). For a `graph G` with `V` vertices and `E` edges to be considered a `tree`:
+
+- `G` has `V - 1` edges;
+- `G` is acyclic but adding an edge makes it cyclic;
+- `G` is connected but removing a single edge disconnects it;
+- One and **one only path** connects any pair of vertices in `G`
+
+`Connected graph`: a graph in which there is a path **from every vertex** to **every other vertex**
+`Parse graph`: a graph in which only a few of edge possibilities are present
+`Dense graph`: a graph in which only a few of edge possibilities are missing (dense quantity of edges)
+
+Some anomalies can exist in the edges:
+
+- self-loop (edge that connects the same vertex);
+- parallel edges (more than one edge connects the same pair of vertex)
+
+Graph algorithms and implementations are covered in this repo. As of now, the following types of graphs have been implemented:
+
+- [Undirected Graphs](#undirected-graphs-with-adjacent-sets)
+
+### Undirected Graphs with Adjacent Sets
+
+![Undirected Graph](docs/assets/img/undirected-graph.png)
+
+An undirect graph is is the simplest `graph` model in which edges are nothing more than mere connections between `vertices` and they hold no information such as a direction, weight, etc. One of the most common ways to represent a graph is to use the "adjacency lists" model (in contrast of "adjacency matrix" model).
+
+Here, this graph has been represented with a symbol table to hold all `vertices` as keys and sets as values to hold all of the adjacent vertices of the given key vertex (adjacency sets).
+
+Undirected graph implemented with adjacency sets [here](algorithms/graphs/undirected/adjacency_sets.py)
 
 ## Running Tests with Sonar
 

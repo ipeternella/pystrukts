@@ -86,14 +86,14 @@ def test_should_create_new_graph_5_vertices_6_edges():
     r"""
     Expected graph:
 
-      1
-     / \
-    2 - 3 - 5
-     \ /
-      4
+       1
+      / \
+    - 2 - 3 - 5
+      \ /
+       4
 
     [1] -> [2, 3]
-    [2] -> [1, 3, 4]
+    [2] -> [1, 2, 3, 4] (self reference)
     [3] -> [1, 2, 4, 5]
     [4] -> [2, 3]
     [5] -> [3]
@@ -108,6 +108,7 @@ def test_should_create_new_graph_5_vertices_6_edges():
 
     # [2] -> [1, 3, 4]
     graph.add_edge("2", "1")
+    graph.add_edge("2", "2")
     graph.add_edge("2", "3")
     graph.add_edge("2", "4")
 
@@ -126,10 +127,10 @@ def test_should_create_new_graph_5_vertices_6_edges():
 
     # assert
     assert graph.vertices == 5
-    assert graph.edges == 6
+    assert graph.edges == 7
 
     assert graph.get_adjacent_vertices("1") == {"2", "3"}
-    assert graph.get_adjacent_vertices("2") == {"1", "3", "4"}
+    assert graph.get_adjacent_vertices("2") == {"1", "2", "3", "4"}
     assert graph.get_adjacent_vertices("3") == {"1", "2", "4", "5"}
     assert graph.get_adjacent_vertices("4") == {"2", "3"}
     assert graph.get_adjacent_vertices("5") == {"3"}
@@ -145,6 +146,7 @@ def test_should_create_new_graph_5_vertices_6_edges():
     assert graph.has_edge("1", "3")
 
     assert graph.has_edge("2", "1")
+    assert graph.has_edge("2", "2")  # self reference
     assert graph.has_edge("2", "3")
     assert graph.has_edge("2", "4")
 
