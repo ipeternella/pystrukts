@@ -1,5 +1,5 @@
 """
-Exceptions raised by Dictionaries.
+Exceptions raised by Symbol tables.
 """
 
 

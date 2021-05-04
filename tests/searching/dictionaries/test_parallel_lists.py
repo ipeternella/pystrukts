@@ -4,8 +4,8 @@ and binary searching.
 """
 import pytest
 
-from algorithms.searching.dictionaries.parallel_lists import OrderedDict
 from algorithms.searching.exceptions import KeyErrorWithRank
+from algorithms.searching.symbol_tables.parallel_lists import OrderedDict
 
 
 def test_should_assert_ordered_dict_two_lists_is_empty():
