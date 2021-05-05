@@ -37,7 +37,7 @@ class LinkedList(Generic[T]):
         """
 
         if self.is_empty():
-            raise StopIteration
+            return
 
         current_node = self._first_node
 
