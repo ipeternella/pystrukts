@@ -86,7 +86,23 @@ Algorithm implementation [here](algorithms/searching/symbol_tables/parallel_list
 
 ### Hash Maps
 
-As hashes **cannot** be reversed, the hashed values (digests) cannot be used to reconstruct the original value (file, object, etc.). As such, it only allows one to determine whether two **objects are identical or not**.
+As hashes **cannot** be reversed, the hashed values (digests) cannot be used to reconstruct the original value (file, object, etc.). As such, it only allows one to determine whether two **objects are identical or not**. Usually, hash functions are composed of two functions:
+
+1. A function that generates hash codes (usually languages supply a hash function on stdlib to hash its types);
+2. A function that converts hash codes into bucket indexes to have quick access to a key's value
+
+In this repo, the following were used:
+
+1. Python's stdlib `hash()` function was used to create hash codes (int) for its types;
+2. Modular hashing (for integers) to transform hash codes into bucket indexes.
+
+Ideally, the hash functions should provide randomly distributed hash values and without collisions (two values that are hashed generate the same hash output). In the real world, however, this is ideal is far from being real, so, two main techniques are used to resolve collisions in order to make hash tables work properly with a given key
+returning only its target value.
+
+- **Separate chaining **(use of linked lists to append collisions -- each bucket value is a reference to linked list);
+- **Linear probing** (reallocation of empty bucket slots in the hash table)
+
+An algorithm implementation of the Se**parate Chaining** technique is [here](algorithms/searching/symbol_tables/hash_map.py)
 
 ## Graph Algorithms
 
