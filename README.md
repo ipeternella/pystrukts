@@ -21,6 +21,7 @@ The following classical algorithms are covered by this repo and written in moder
 - [Searching Algorithms](#searching-algorithms)
   - [Binary Search For Lists](#binary-search-for-lists)
   - [Ordered Dictionary with two parallel lists](#ordered-dictionary-with-two-parallel-lists)
+  - [Hash Maps](#hash-maps)
 - [Graph Algorithms](#graph-algorithms)
   - [Undirected Graphs with Adjacent Sets](#undirected-graphs-with-adjacent-sets)
 - [Running tests locally with Sonar](#running-tests-with-sonar)
@@ -81,7 +82,27 @@ Also known as `Symbol tables`, a simple dictionary implementation has been creat
 - `put(key, value)`: time complexity is `O(N)` for inserts (worst case due to whole array reallocation), and `O(1)` for updates. Hence, for M new key inserts we have: `O(M*N)` time complexity
 - `pop(key)`: time complexity is `O(N)` (worst case due to whole array reallocation)
 
-Algorithm implementation [here](algorithms/searching/dictionaries/parallel_lists.py)
+Algorithm implementation [here](algorithms/searching/symbol_tables/parallel_lists.py)
+
+### Hash Maps
+
+As hashes **cannot** be reversed, the hashed values (digests) cannot be used to reconstruct the original value (file, object, etc.). As such, it only allows one to determine whether two **objects are identical or not**. Usually, hash functions are composed of two functions:
+
+1. A function that generates hash codes (usually languages supply a hash function on stdlib to hash its types);
+2. A function that converts hash codes into bucket indexes to have quick access to a key's value
+
+In this repo, the following were used:
+
+1. Python's stdlib `hash()` function was used to create hash codes (int) for its types;
+2. Modular hashing (for integers) to transform hash codes into bucket indexes.
+
+Ideally, the hash functions should provide randomly distributed hash values and without collisions (two values that are hashed generate the same hash output). In the real world, however, this is ideal is far from being real, so, two main techniques are used to resolve collisions in order to make hash tables work properly with a given key
+returning only its target value.
+
+- **Separate chaining **(use of linked lists to append collisions -- each bucket value is a reference to linked list);
+- **Linear probing** (reallocation of empty bucket slots in the hash table)
+
+An algorithm implementation of the Se**parate Chaining** technique is [here](algorithms/searching/symbol_tables/hash_map.py)
 
 ## Graph Algorithms
 

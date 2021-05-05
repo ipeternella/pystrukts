@@ -29,7 +29,7 @@ class LinkedList(Generic[T]):
     def __len__(self) -> int:
         return self._length
 
-    def __iter__(self) -> Generator:
+    def __iter__(self) -> Generator[T, None, None]:
         """
         Traverses the whole linked list.
 
@@ -37,7 +37,7 @@ class LinkedList(Generic[T]):
         """
 
         if self.is_empty():
-            raise StopIteration
+            return
 
         current_node = self._first_node
 
