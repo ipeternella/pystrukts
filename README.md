@@ -21,6 +21,7 @@ The following classical algorithms are covered by this repo and written in moder
 - [Searching Algorithms](#searching-algorithms)
   - [Binary Search For Lists](#binary-search-for-lists)
   - [Ordered Dictionary with two parallel lists](#ordered-dictionary-with-two-parallel-lists)
+  - [Hash Maps](#hash-maps)
 - [Graph Algorithms](#graph-algorithms)
   - [Undirected Graphs with Adjacent Sets](#undirected-graphs-with-adjacent-sets)
 - [Running tests locally with Sonar](#running-tests-with-sonar)
@@ -81,7 +82,11 @@ Also known as `Symbol tables`, a simple dictionary implementation has been creat
 - `put(key, value)`: time complexity is `O(N)` for inserts (worst case due to whole array reallocation), and `O(1)` for updates. Hence, for M new key inserts we have: `O(M*N)` time complexity
 - `pop(key)`: time complexity is `O(N)` (worst case due to whole array reallocation)
 
-Algorithm implementation [here](algorithms/searching/dictionaries/parallel_lists.py)
+Algorithm implementation [here](algorithms/searching/symbol_tables/parallel_lists.py)
+
+### Hash Maps
+
+As hashes **cannot** be reversed, the hashed values (digests) cannot be used to reconstruct the original value (file, object, etc.). As such, it only allows one to determine whether two **objects are identical or not**.
 
 ## Graph Algorithms
 

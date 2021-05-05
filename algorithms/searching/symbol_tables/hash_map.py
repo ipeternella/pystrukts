@@ -27,43 +27,19 @@ class HashMap(Generic[KT, VT]):
     """
 
     _buckets: List[LinkedList[Node[KT, VT]]]  # list of linked lists (buckets)
-    _size: int  # hash table size
+    _keys_count: int  # total keys inside the hashmap
 
     def __init__(self, hash_table_size: int = 97) -> None:
-        self._size = 0
         self._buckets = [LinkedList()] * hash_table_size  # empty list of linked lists
+        self._keys_count = 0
 
-    def _hash(self, key: KT) -> int:
+    @property
+    def buckets_size(self) -> int:
         """
-        Hashing function of the keys. The hash function if a composition of two functions:
-
-        1. The first fn converts the key into its integer hash code:
-            - Each type has require its own hash fn, so we use std lib's hash fn
-
-        2. The second fn converts the hash code into a bucket index (from _buckets list)
-            - Here we use modular hashing (common for ints): hash_code % M (M = table size)
+        Returns the size of the hashmap's bucket list. Notice that this is not the same as the
+        amount of keys inside the map (not _keys_count).
         """
-        # fn 1
-        hash_code = hash(key)
-
-        # fn 2
-        bucket_ix = hash_code % self._size  # modular hashing
-
-        return bucket_ix
-
-    def _get_node(self, key: KT) -> Node[KT, VT]:
-        """
-        Gets a node from the hash table. If the key is not found, raises KeyError.
-        """
-        bucket_ix = self._hash(key)
-        linked_list = self._buckets[bucket_ix]
-
-        # traverses linked list to find the appropriate key value
-        for node in linked_list:
-            if node.key == key:
-                return node
-
-        raise KeyError
+        return len(self._buckets)
 
     def get(self, key: KT, default_value: VT) -> VT:
         """
@@ -87,9 +63,47 @@ class HashMap(Generic[KT, VT]):
         try:
             node = self._get_node(key)
             node.value = value  # updates value
-
         except KeyError:
             linked_list = self._buckets[bucket_ix]
 
             new_node = Node(key, value)
             linked_list.insert_right(new_node)  # adds new value
+            self._keys_count += 1  # increases key count
+
+    def _hash(self, key: KT) -> int:
+        """
+        Hashing function of the keys. The hash function if a composition of two functions:
+
+        1. The first fn converts the key into its integer hash code:
+            - Each type has require its own hash fn, so we use std lib's hash fn
+
+        2. The second fn converts the hash code into a bucket index (from _buckets list)
+            - Here we use modular hashing (common for ints): hash_code % M (M = table size)
+        """
+        # fn 1
+        hash_code = hash(key)
+
+        # fn 2
+        bucket_ix = hash_code % self.buckets_size  # modular hashing
+
+        return bucket_ix
+
+    def _get_node(self, key: KT) -> Node[KT, VT]:
+        """
+        Gets a node from the hash table. If the key is not found, raises KeyError.
+        """
+        bucket_ix = self._hash(key)
+        linked_list = self._buckets[bucket_ix]
+
+        # traverses linked list to find the appropriate key value
+        for node in linked_list:
+            if node.key == key:
+                return node
+
+        raise KeyError
+
+    def __len__(self) -> int:
+        """
+        Returns the amount of keys inside the hashmap.
+        """
+        return self._keys_count
