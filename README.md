@@ -24,6 +24,7 @@ The following classical algorithms are covered by this repo and written in moder
   - [Hash Maps](#hash-maps)
 - [Graph Algorithms](#graph-algorithms)
   - [Undirected Graphs with Adjacent Sets](#undirected-graphs-with-adjacent-sets)
+  - [Depth First Search](#depth-first-search)
 - [Running tests locally with Sonar](#running-tests-with-sonar)
 
 ## Fundamental Algorithms
@@ -135,6 +136,14 @@ An undirect graph is is the simplest `graph` model in which edges are nothing mo
 Here, this graph has been represented with a symbol table to hold all `vertices` as keys and sets as values to hold all of the adjacent vertices of the given key vertex (adjacency sets).
 
 Undirected graph implemented with adjacency sets [here](algorithms/graphs/undirected/adjacency_sets.py)
+
+### Depth First Search
+
+The classic recursive depth first search algorithm has been implemented. The implementation uses a class, `DepthFirstSearch`, and its constructor to perform the search in order to keep a "state of the graph" that any user can use to query some properties of the "searched graph" such as if a given vertex was visited or the total count of vertices that were found in the graph.
+
+This implementation uses a hash set to keep track of the visited nodes (much like Trémaux's algorithm) in order to serve as the base case for the recursive algorithm.
+
+Implementation [here](algorithms/graphs/undirected/depth_first_search.py)
 
 ## Running Tests with Sonar
 
