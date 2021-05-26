@@ -20,6 +20,7 @@ The following classical algorithms are covered by this repo and written in moder
   - [Stacks](#stacks)
 - [Searching Algorithms](#searching-algorithms)
   - [Binary Search For Lists](#binary-search-for-lists)
+  - [Binary Search Tree](#binary-search-tree)
   - [Ordered Dictionary with two parallel lists](#ordered-dictionary-with-two-parallel-lists)
   - [Hash Maps](#hash-maps)
 - [Graph Algorithms](#graph-algorithms)
@@ -74,6 +75,12 @@ We begin the section of algorithms by considering the classic binary search and 
 The efficient searching algorithm for sorted lists is covered here.
 
 Algorithm implementation [here](algorithms/searching/binary_search.py)
+
+### Binary Search Tree
+
+A binary search tree implementation is also covered in this repo. It was used to provide a symbol table/dictionary-like API for users with methods such as `get()`, `put()`, etc.
+
+Algorithm implementation [here](algorithms/searching/trees/binary_search_tree.py)
 
 ### Ordered Dictionary with two parallel lists
 
