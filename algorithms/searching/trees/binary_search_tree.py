@@ -72,7 +72,7 @@ class Node(Generic[KT, VT]):
 
     def add_right_sibling(self, node: Node[KT, VT]) -> None:
         """
-        Adds a left sibling node below this node.
+        Adds a right sibling node below this node.
         """
         self._total_nodes_below += 1
         self._right = node
@@ -80,7 +80,7 @@ class Node(Generic[KT, VT]):
 
 class BinarySearchTree(Generic[KT, VT]):
     """
-    Binary Search Tree implementation in which, for a given node, its value is larger than
+    Binary Search Tree implementation: for any given node, its own value is larger than
     all keys in all nodes of its left subtree and smaller than all keys in all nodes of its
     right subtree.
     """
@@ -106,7 +106,7 @@ class BinarySearchTree(Generic[KT, VT]):
             return node.value
 
         # reduce the problem: recursion!
-        if key > node.key:  # follow the right side of the binary tree
+        if key > node.key:
             # nowhere to go: not found!
             if node.right is None:
                 raise KeyError

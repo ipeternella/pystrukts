@@ -18,6 +18,10 @@ def assert_node(
     expected_value: Optional[VT] = None,
     expected_total_nodes_below: Optional[int] = None,
 ):
+    """
+    Utility function to help with trees assertions by taking a tree path
+    list of directions to find a node and assert its key/value.
+    """
     tree_node = binary_tree_walk(binary_tree, path)
 
     try:
