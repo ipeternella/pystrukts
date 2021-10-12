@@ -6,7 +6,7 @@ x-build: &dockerfile-dev-build
 
 services:
   sonar:
-    container_name: algorithms_sonar_server
+    container_name: pystrukts_sonar_server
     image: sonarqube:latest
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
@@ -14,7 +14,7 @@ services:
       - "9000:9000"
 
   sonar_scanner:
-    container_name: algorithms_sonar_scanner
+    container_name: pystrukts_sonar_scanner
     image: sonarsource/sonar-scanner-cli:latest
     environment:
       - SONAR_HOST_URL=http://sonar:9000
@@ -23,7 +23,7 @@ services:
       - .:/app # coverage.xml results filepath must begin with '/app'
 
   tests:
-    container_name: algorithm_tests
+    container_name: pystrukts_tests
     build: *dockerfile-dev-build
     volumes:
       - .:/app

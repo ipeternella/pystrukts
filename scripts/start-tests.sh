@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 COVER_PROJECT_PATH=.
 TESTS_PROJECT_PATH=tests
 

@@ -4,19 +4,22 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-# Coding tools
-mypy = "*"
+# linters
 flake8 = "*"
-black = "20.8b1"
+pylint = "*"
+
+# static type checker
+mypy = "*"
+
+# format tools
+black = "21.9b0"
 isort = "*"
 
-# Testing tools
-tox = "*"
+# testing and coverage tools
 pytest = "*"
 pytest-cov = "*"
 
 [packages]
-urllib3 = ">=1.26.4"
 requests = "*"
 
 [scripts]
@@ -25,4 +28,4 @@ requests = "*"
 python_version = "3.9"
 
 [pipenv]
-allow_prereleases = true  # for black (! care for updates)
+allow_prereleases = true  # for black
