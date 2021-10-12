@@ -5,10 +5,9 @@ from __future__ import annotations
 
 from typing import Generic
 from typing import Optional
-from typing import TypeVar
 
-KT = TypeVar("KT")  # pylint: disable=invalid-name
-VT = TypeVar("VT")  # pylint: disable=invalid-name
+from pystrukts._types.basic import KT
+from pystrukts._types.basic import VT
 
 
 class LinkedList(Generic[KT, VT]):
