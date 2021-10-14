@@ -78,12 +78,34 @@ class TestSuiteBSTree(unittest.TestCase):
         tree = self.build_bstree_one()
 
         # act
-        min_node = tree.min()
-        max_node = tree.max()
+        min_value = tree.min()
+        max_value = tree.max()
 
         # assert
-        self.assertEqual(min_node.key, 2)
-        self.assertEqual(max_node.key, 19)
+        self.assertEqual(min_value, 2)
+        self.assertEqual(max_value, 19)
+
+        # arrange - empty tree
+        tree = BSTree()
+
+        # act
+        min_value = tree.min()
+        max_value = tree.max()
+
+        # assert
+        self.assertIsNone(min_value)
+        self.assertIsNone(max_value)
+
+        # arrange - tree of a single node
+        tree = self.build_bstree_three()
+
+        # act
+        min_value = tree.min()
+        max_value = tree.max()
+
+        # assert
+        self.assertEqual(min_value, 12)
+        self.assertEqual(max_value, 12)
 
     def test_should_delete_items_from_bstree(self):
         """
