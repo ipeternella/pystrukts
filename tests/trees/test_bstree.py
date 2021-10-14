@@ -70,6 +70,129 @@ class TestSuiteBSTree(unittest.TestCase):
         self.assertEqual(height_3, 0)  # single-noded: has no edges, hence its height == 0
         self.assertEqual(height_4, -1)  # tree without any nodes at all: invalid height == -1
 
+    def test_should_return_max_and_min_values_of_bstree(self):
+        """
+        Should return max and min values of a binary search tree.
+        """
+        # arrange
+        tree = self.build_bstree_one()
+
+        # act
+        min_node = tree.min()
+        max_node = tree.max()
+
+        # assert
+        self.assertEqual(min_node.key, 2)
+        self.assertEqual(max_node.key, 19)
+
+    def test_should_delete_items_from_bstree(self):
+        """
+        Should delete items from a bstree.
+        """
+        # arrange
+        #         12
+        #      /      \
+        #     5        18
+        #   /   \     /  \
+        #  2     9   15   19
+        #           /  \
+        #         13   17
+        tree = self.build_bstree_one()
+
+        # act
+        deleted = tree.delete(15)
+
+        # assert - height == 3
+        #         12
+        #      /      \
+        #     5        18
+        #   /   \     /  \
+        #  2     9   17   19
+        #           /
+        #         13
+        self.assertEqual(deleted, 15)
+        self.assertEqual(tree.root.right.left.key, 17)
+        self.assertEqual(tree.root.right.left.left.key, 13)
+        self.assertEqual(tree.height(), 3)
+
+        # act - delete root node
+        deleted = tree.delete(12)
+
+        # assert - height == 2
+        #         13
+        #      /      \
+        #     5        18
+        #   /   \     /  \
+        #  2     9   17   19
+        self.assertEqual(deleted, 12)
+        self.assertEqual(tree.root.key, 13)
+        self.assertEqual(tree.root.left.key, 5)
+        self.assertEqual(tree.root.right.key, 18)
+        self.assertEqual(tree.height(), 2)
+
+        # act
+        deleted = tree.delete(13)
+
+        # assert - state:
+        #         17
+        #      /      \
+        #     5        18
+        #   /   \        \
+        #  2     9       19
+        self.assertEqual(deleted, 13)
+        self.assertEqual(tree.root.key, 17)
+        self.assertEqual(tree.root.right.key, 18)
+        self.assertEqual(tree.root.left.key, 5)
+
+        # act
+        deleted = tree.delete(18)
+
+        # assert - state:
+        #         17
+        #      /      \
+        #     5        19
+        #   /   \
+        #  2     9
+        self.assertEqual(tree.root.key, 17)
+        self.assertEqual(tree.root.right.key, 19)
+
+        # act
+        deleted = tree.delete(2)
+        deleted = tree.delete(9)
+
+        # assert - height == 1
+        #         17
+        #      /      \
+        #     5        19
+        self.assertEqual(deleted, 9)
+        self.assertEqual(tree.height(), 1)
+        self.assertEqual(tree.root.key, 17)
+        self.assertEqual(tree.root.left.key, 5)
+        self.assertEqual(tree.root.right.key, 19)
+
+        # act
+        deleted = tree.delete(5)
+        deleted = tree.delete(19)
+
+        # assert - height == 0
+        #         17 (final node)
+        self.assertEqual(tree.root.key, 17)
+        self.assertEqual(tree.height(), 0)
+
+        # act - nonexistent key
+        deleted = tree.delete(20)
+
+        # assert
+        self.assertIsNone(deleted)
+
+        # act - tree has been emptied
+        deleted = tree.delete(17)
+
+        # assert
+        self.assertEqual(deleted, 17)
+        self.assertEqual(tree.height(), -1)  # empty tree
+        self.assertIsNone(tree.root)
+
     def build_bstree_one(self) -> BSTree[int, int]:
         r"""
         Binary search tree one used on tests:
