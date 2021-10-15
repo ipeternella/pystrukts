@@ -171,7 +171,7 @@ class BSTree(Generic[KT, VT]):
         if node is None:
             return None
 
-        # trivial cases: no children
+        # trivial cases: one child is missing
         if node.left is None:
             self._transplant(node, node.right)
             return node.value
