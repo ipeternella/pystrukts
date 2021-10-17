@@ -48,12 +48,15 @@ class DefaultSerializer(Serializer[T]):
         return pickle.loads(bytes)
 
 
-@dataclass(frozen=True)
+@dataclass
 class PageMemoryLayout:
     page_size: int
+    endianness: Literal["little", "big"]
     max_key_size: int
     max_value_size: int
-    endianness: Literal["little", "big"]
+
+    # last used page
+    last_page: int = -1
 
     # page headers byte sizes
     node_type_header_space: int = 1
@@ -63,6 +66,36 @@ class PageMemoryLayout:
     node_pointer_space: int = 4  # inner-nodes only
     sibling_pointer_space: int = 4  # leaf-nodes only
 
+    def to_page(self) -> bytes:
+        """
+        Creates a byte array of the tree memory layout settings to be persisted on disk. The memory
+        layout of the byte array is as follows:
+
+        page_size, max_key_size, max_value_size, last_page, padding
+        4 bytes, 4 bytes, 4 bytes, 4 bytes, (page_size - 4 * 4) bytes
+        """
+        page_data = bytes()
+
+        page_data += self.page_size.to_bytes(4, self.endianness)
+        page_data += self.max_key_size.to_bytes(4, self.endianness)
+        page_data += self.max_value_size.to_bytes(4, self.endianness)
+        page_data += self.last_page.to_bytes(4, self.endianness)
+        page_data += bytes(self.page_size - len(page_data))  # padding
+
+        return page_data
+
+    @classmethod
+    def from_page(cls, data: bytes, endianess: Literal["little", "big"] = "big") -> PageMemoryLayout:
+        """
+        Reads a tree memory layout settings from a disk byte array.
+        """
+        page_size = int.from_bytes(data[0:4], endianess)
+        max_key_size = int.from_bytes(data[4:8], endianess)
+        max_value_size = int.from_bytes(data[8:12], endianess)
+        last_page = int.from_bytes(data[12:16], endianess)
+
+        return PageMemoryLayout(page_size, endianess, max_value_size, max_key_size, last_page)
+
 
 class PagedFileMemory:
     """
@@ -70,45 +103,49 @@ class PagedFileMemory:
     to manipulate (read, write) pages to disk.
     """
 
-    last_page: int
     tree_file: BinaryIO
     memory_layout: PageMemoryLayout
 
     def __init__(
         self,
         page_size: int,
-        max_key_size: int,
-        max_value_size: int,
         endianness: Literal["little", "big"],
+        max_key_size: int = 0,
+        max_value_size: int = 0,
         tree_file: Optional[StrPath] = None,
     ) -> None:
         self.tree_file, is_new_tree = self._open_tree_file(tree_file)
-        self.memory_layout = PageMemoryLayout(page_size, max_key_size, max_value_size, endianness)
 
         if is_new_tree:
-            self.last_page = -1
-            # persist tree settings on disk
+            self.memory_layout = PageMemoryLayout(page_size, endianness, max_key_size, max_value_size)
+
+            page_number = self.allocate_node()
+            page_data = self.memory_layout.to_page()
+
+            self.write_page(page_number, page_data)
         else:
-            # read last page from disk's tree file
-            # read settings from tree file's first page
-            pass
+            # no memory layout exists so far, so explicity pass the page_size and endianness
+            page_data = self.read_page(0, page_size)
+            self.memory_layout = PageMemoryLayout.from_page(page_data, endianness)
 
     def allocate_node(self) -> int:
         """
         Allocates a new page on disk and returns the page number reference.
         """
         empty_page = bytes(self.memory_layout.page_size)
-        self.last_page += 1
+        self.memory_layout.last_page += 1
+        self.write_page(self.memory_layout.last_page, empty_page)
 
-        self.write_page(self.last_page, empty_page)
-        return self.last_page
+        return self.memory_layout.last_page
 
-    def read_page(self, page_number: int) -> bytearray:
+    def read_page(self, page_number: int, page_size: Optional[int] = None) -> bytearray:
         """
         Reads a disk page from the tree file.
         """
-        page_start = page_number * self.memory_layout.page_size
-        page_end = page_start + self.memory_layout.page_size
+        page_size = page_size if page_size is not None else self.memory_layout.page_size
+
+        page_start = page_number * page_size
+        page_end = page_start + page_size
         data = bytearray()
 
         # sets file's stream cursor at the beginning of the page
@@ -122,20 +159,21 @@ class PagedFileMemory:
 
         return data
 
-    def write_page(self, page: int, data: bytes | bytearray) -> None:
+    def write_page(self, page: int, data: bytes | bytearray, page_size: Optional[int] = None) -> None:
         """
         Writes a full disk block to the tree file.
         """
+        page_size = page_size if page_size is not None else self.memory_layout.page_size
         stream_bytes = len(data)
         flushed_bytes = 0
 
-        if stream_bytes != self.memory_layout.page_size:
+        if stream_bytes != page_size:
             raise ValueError(
                 f"Page write received stream data of {stream_bytes} bytes "
-                f"which is not the current page size of {self.memory_layout.page_size} bytes!"
+                f"which is not the current page size of {page_size} bytes!"
             )
 
-        page_start = page * self.memory_layout.page_size
+        page_start = page * page_size
 
         # sets stream cursor position
         self.tree_file.seek(page_start)
@@ -161,9 +199,6 @@ class PagedFileMemory:
         tree_fd = open(file_path, "x+b", buffering=0)  # creates file it doesn't exist
         return tree_fd, True
 
-    def _save_tree_settings(self) -> None:
-        pass
-
 
 class BPlusTree(Generic[KT, VT]):
     """
@@ -187,7 +222,7 @@ class BPlusTree(Generic[KT, VT]):
     ) -> None:
         self.key_serializer = key_serializer if key_serializer is not None else DefaultSerializer[KT]()
         self.value_serializer = value_serializer if value_serializer is not None else DefaultSerializer[VT]()
-        self.memory = PagedFileMemory(page_size, max_key_size, max_value_size, endianness, tree_file)
+        self.memory = PagedFileMemory(page_size, endianness, max_key_size, max_value_size, tree_file)
         self.degree = self._compute_degree()
 
     def _compute_degree(self) -> int:

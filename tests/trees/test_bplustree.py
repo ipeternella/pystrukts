@@ -22,7 +22,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             page_number = memory.allocate_node()
 
             # assert
-            self.assertEqual(page_number, 0)
+            self.assertEqual(page_number, 1)  # page 0 is the tree settings page
 
             # act - read page
             page_data = memory.read_page(page_number)
@@ -64,4 +64,4 @@ class TestSuiteBPlusTree(unittest.TestCase):
         max_value_size: int = 8,
         endianness: Literal["little", "big"] = "big",
     ) -> PagedFileMemory:
-        return PagedFileMemory(page_size, max_key_size, max_value_size, endianness, tree_file)
+        return PagedFileMemory(page_size, endianness, max_key_size, max_value_size, tree_file)
