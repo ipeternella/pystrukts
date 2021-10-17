@@ -86,20 +86,30 @@ class PagedFileMemory:
         self.memory_layout = PageMemoryLayout(page_size, max_key_size, max_value_size, endianness)
 
         if is_new_tree:
-            self.last_page = 0
+            self.last_page = -1
             # persist tree settings on disk
         else:
             # read last page from disk's tree file
             # read settings from tree file's first page
             pass
 
-    def read_page(self, page_number: int) -> bytes:
+    def allocate_node(self) -> int:
+        """
+        Allocates a new page on disk and returns the page number reference.
+        """
+        empty_page = bytes(self.memory_layout.page_size)
+        self.last_page += 1
+
+        self.write_page(self.last_page, empty_page)
+        return self.last_page
+
+    def read_page(self, page_number: int) -> bytearray:
         """
         Reads a disk page from the tree file.
         """
         page_start = page_number * self.memory_layout.page_size
         page_end = page_start + self.memory_layout.page_size
-        data = bytes()
+        data = bytearray()
 
         # sets file's stream cursor at the beginning of the page
         page_cursor = self.tree_file.seek(page_start)
@@ -112,7 +122,7 @@ class PagedFileMemory:
 
         return data
 
-    def write_page(self, page: int, data: bytes) -> None:
+    def write_page(self, page: int, data: bytes | bytearray) -> None:
         """
         Writes a full disk block to the tree file.
         """
