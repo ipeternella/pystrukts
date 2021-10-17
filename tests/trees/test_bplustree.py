@@ -17,7 +17,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             # arrange
             page_data = b"hello world 1"
             page_size = len(page_data)
-            tree: BPlusTree[int, int] = BPlusTree(btree_file, page_size=page_size)
+            tree: BPlusTree[int, int] = BPlusTree(btree_file, page_size=page_size, max_key_size=2)
 
             # act
             tree.memory.write_page(0, b"hello world 1")

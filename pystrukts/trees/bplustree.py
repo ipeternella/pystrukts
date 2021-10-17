@@ -55,7 +55,7 @@ class PageMemoryLayout:
     max_value_size: int
     endianness: Literal["little", "big"]
 
-    # page headers byte sizes (in bytes)
+    # page headers byte sizes
     node_type_header_space: int = 1
     records_count_header_space: int = 4  # int32
 
@@ -77,8 +77,8 @@ class PagedFileMemory:
     def __init__(
         self,
         page_size: int,
-        max_value_size: int,
         max_key_size: int,
+        max_value_size: int,
         endianness: Literal["little", "big"],
         tree_file: Optional[StrPath] = None,
     ) -> None:
@@ -178,7 +178,22 @@ class BPlusTree(Generic[KT, VT]):
         self.key_serializer = key_serializer if key_serializer is not None else DefaultSerializer[KT]()
         self.value_serializer = value_serializer if value_serializer is not None else DefaultSerializer[VT]()
         self.memory = PagedFileMemory(page_size, max_key_size, max_value_size, endianness, tree_file)
-        self.degree = self._compute_tree_degree()
+        self.degree = self._compute_degree()
 
-    def _compute_tree_degree(self) -> int:
-        pass
+    def _compute_degree(self) -> int:
+        page_headers_size = (
+            self.memory.memory_layout.node_type_header_space + self.memory.memory_layout.records_count_header_space
+        )
+        each_record_size = self.memory.memory_layout.node_pointer_space + self.memory.memory_layout.max_key_size
+        free_page_size = self.memory.memory_layout.page_size - page_headers_size
+
+        # 2*t - 1 == "max keys in node on a single page" -> 2*t - 1 == free_page_size / each_record_size and solve for t
+        degree = int((free_page_size / each_record_size + 1) / 2)  # max amount of keys in inner nodes
+
+        if degree <= 0:
+            raise ValueError(
+                "Impossible disk page memory layout: B+tree's degree <= 0! Please, "
+                "increase the page size or reduce the max key value size."
+            )
+
+        return degree
