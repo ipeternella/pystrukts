@@ -17,14 +17,14 @@ class TestSuiteBPlusTree(unittest.TestCase):
             # arrange
             page_data = b"hello world 1"
             page_size = len(page_data)
-            tree = BPlusTree(btree_file, page_size=page_size)
+            tree: BPlusTree[int, int] = BPlusTree(btree_file, page_size=page_size)
 
             # act
-            tree.memory_storage.write_page(0, b"hello world 1")
-            tree.memory_storage.write_page(1, b"hello world 2")
+            tree.memory.write_page(0, b"hello world 1")
+            tree.memory.write_page(1, b"hello world 2")
 
-            page_0 = tree.memory_storage.read_page(0)
-            page_1 = tree.memory_storage.read_page(1)
+            page_0 = tree.memory.read_page(0)
+            page_1 = tree.memory.read_page(1)
 
             # assert
             str_0 = page_0.decode("utf-8")

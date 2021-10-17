@@ -4,70 +4,89 @@ Module with a B+tree implementation.
 from __future__ import annotations
 
 import os
+import pickle
 from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 from typing import BinaryIO
 from typing import Generic
 from typing import Literal
 from typing import Optional
+from typing import Protocol
 from typing import Tuple
 from typing import Union
 from uuid import uuid4
 
-from pystrukts._types.comparable import KT
-from pystrukts._types.comparable import VT
+from pystrukts._types.basic import KT
+from pystrukts._types.basic import VT
+from pystrukts._types.basic import T
 
 StrPath = Union[str, bytes, os.PathLike]
 
 
-class NodeType(Enum):
+class Serializer(Protocol[T]):
     """
-    B+tree node type: inner or leaf.
+    Default serialization protocol used by the B+tree.
     """
 
-    INNER = 1
-    LEAF = 2
+    def to_bytes(self, object: T) -> bytes:
+        """Serializes an object into a byte array."""
+
+    def from_bytes(self, bytes: bytes | bytearray) -> T:
+        """Deserializes a byte array back into a Python object."""
+
+
+class DefaultSerializer(Serializer[T]):
+    """
+    Default serializer based on stdlib's Pickle to be used in case a customized
+    one is not supplied.
+    """
+
+    def to_bytes(self, object) -> bytes:
+        return pickle.dumps(object)
+
+    def from_bytes(self, bytes: bytes | bytearray) -> T:
+        return pickle.loads(bytes)
 
 
 @dataclass(frozen=True)
-class BPlusTreeSettings:
-    # configurable settings
+class PageMemoryLayout:
     page_size: int
-    min_degree: int
     max_key_size: int
     max_value_size: int
     endianness: Literal["little", "big"]
 
-    # constant settings like byte sizes for different tree entities
-    DEFAULT_PAGE_SIZE: int = 4096
-    DEFAULT_MIN_DEGREE: int = 2
-    DEFAULT_ENDIANNESS: Literal["little", "big"] = "big"
+    # page headers byte sizes (in bytes)
+    node_type_header_space: int = 1
+    records_count_header_space: int = 4  # int32
 
-    KEY_BYTES_SIZE: int = 8
-    VALUE_BYTES_SIZE: int = 32
+    # page payload byte sizes
+    node_pointer_space: int = 4  # inner-nodes only
+    sibling_pointer_space: int = 4  # leaf-nodes only
 
 
-class DiskStorage:
+class PagedFileMemory:
     """
-    Represents a file that is used as the main memory storage for the B+tree. It's used
+    Represents a file that is used as the memory storage for the B+tree. It's used
     to manipulate (read, write) pages to disk.
     """
 
     last_page: int
-    tree_fd: BinaryIO
-    tree_settings: BPlusTreeSettings
+    tree_file: BinaryIO
+    memory_layout: PageMemoryLayout
 
     def __init__(
         self,
-        tree_settings: BPlusTreeSettings,
+        page_size: int,
+        max_value_size: int,
+        max_key_size: int,
+        endianness: Literal["little", "big"],
         tree_file: Optional[StrPath] = None,
     ) -> None:
-        self.tree_fd, new_tree = self._open_tree_file(tree_file)
+        self.tree_file, is_new_tree = self._open_tree_file(tree_file)
+        self.memory_layout = PageMemoryLayout(page_size, max_key_size, max_value_size, endianness)
 
-        if new_tree:
+        if is_new_tree:
             self.last_page = 0
-            self.tree_settings = tree_settings
             # persist tree settings on disk
         else:
             # read last page from disk's tree file
@@ -78,18 +97,18 @@ class DiskStorage:
         """
         Reads a disk page from the tree file.
         """
-        page_start = page_number * self.tree_settings.page_size
-        page_end = page_start + self.tree_settings.page_size
+        page_start = page_number * self.memory_layout.page_size
+        page_end = page_start + self.memory_layout.page_size
         data = bytes()
 
         # sets file's stream cursor at the beginning of the page
-        page_cursor = self.tree_fd.seek(page_start)
+        page_cursor = self.tree_file.seek(page_start)
 
         # read() may return less bytes than expected, so we iterate until
         # the cursor position is at the end of the page
         while page_cursor != page_end:
-            data += self.tree_fd.read(page_end - page_cursor)  # reading moves cursor forward
-            page_cursor = self.tree_fd.tell()
+            data += self.tree_file.read(page_end - page_cursor)  # reading moves cursor forward
+            page_cursor = self.tree_file.tell()
 
         return data
 
@@ -100,20 +119,20 @@ class DiskStorage:
         stream_bytes = len(data)
         flushed_bytes = 0
 
-        if stream_bytes != self.tree_settings.page_size:
+        if stream_bytes != self.memory_layout.page_size:
             raise ValueError(
                 f"Page write received stream data of {stream_bytes} bytes "
-                f"which is not the current page size of {self.tree_settings.page_size} bytes!"
+                f"which is not the current page size of {self.memory_layout.page_size} bytes!"
             )
 
-        page_start = page * self.tree_settings.page_size
+        page_start = page * self.memory_layout.page_size
 
         # sets stream cursor position
-        self.tree_fd.seek(page_start)
+        self.tree_file.seek(page_start)
 
         # write() may actually write less than stream_bytes, so we iterate to guarantee full write
         while flushed_bytes < stream_bytes:
-            flushed_bytes += self.tree_fd.write(data[flushed_bytes:])
+            flushed_bytes += self.tree_file.write(data[flushed_bytes:])
 
     def _open_tree_file(self, file_path: Optional[StrPath]) -> Tuple[BinaryIO, bool]:
         """
@@ -132,30 +151,34 @@ class DiskStorage:
         tree_fd = open(file_path, "x+b", buffering=0)  # creates file it doesn't exist
         return tree_fd, True
 
+    def _save_tree_settings(self) -> None:
+        pass
+
 
 class BPlusTree(Generic[KT, VT]):
     """
     Class that represents a B+tree.
     """
 
-    page_size: int
-    settings: BPlusTreeSettings
-    memory_storage: DiskStorage
+    degree: int
+    memory: PagedFileMemory
+    key_serializer: Serializer[KT]
+    value_serializer: Serializer[VT]
 
     def __init__(
         self,
         tree_file: Optional[StrPath] = None,
-        min_degree: int = BPlusTreeSettings.DEFAULT_MIN_DEGREE,
-        page_size: int = BPlusTreeSettings.DEFAULT_PAGE_SIZE,
-        key_size: int = BPlusTreeSettings.KEY_BYTES_SIZE,
-        value_size: int = BPlusTreeSettings.VALUE_BYTES_SIZE,
-        endianness: Literal["little", "big"] = BPlusTreeSettings.DEFAULT_ENDIANNESS,
+        key_serializer: Optional[Serializer[KT]] = None,
+        value_serializer: Optional[Serializer[VT]] = None,
+        page_size: int = 4096,
+        max_key_size: int = 8,
+        max_value_size: int = 32,
+        endianness: Literal["little", "big"] = "big",
     ) -> None:
-        self.settings = BPlusTreeSettings(
-            page_size=page_size,
-            min_degree=min_degree,
-            max_key_size=key_size,
-            max_value_size=value_size,
-            endianness=endianness,
-        )
-        self.memory_storage = DiskStorage(self.settings, tree_file)
+        self.key_serializer = key_serializer if key_serializer is not None else DefaultSerializer[KT]()
+        self.value_serializer = value_serializer if value_serializer is not None else DefaultSerializer[VT]()
+        self.memory = PagedFileMemory(page_size, max_key_size, max_value_size, endianness, tree_file)
+        self.degree = self._compute_tree_degree()
+
+    def _compute_tree_degree(self) -> int:
+        pass
