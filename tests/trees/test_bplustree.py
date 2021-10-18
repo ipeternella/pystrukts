@@ -3,6 +3,7 @@ import unittest
 from pystrukts._types.basic import Endianness
 from pystrukts.trees.bplustree.bplustree import BPlusTree
 from pystrukts.trees.bplustree.memory import PagedFileMemory
+from pystrukts.trees.bplustree.node import LeafRecord
 from tests.trees.utils import tmp_btree_file
 
 
@@ -62,10 +63,10 @@ class TestSuiteBPlusTree(unittest.TestCase):
         Should read previous tree configuration stored on disk.
         """
         with tmp_btree_file() as btree_file:
-            # arrange - should store settings on disk
+            # arrange - should store settings on disk from main memory
             BPlusTree(btree_file, page_size=200, max_key_size=7, max_value_size=14)
 
-            # act
+            # act - should reopen the tree file and fetch the settings from disk this time
             reopened_tree: BPlusTree[int, str] = BPlusTree(btree_file, page_size=200)
 
             # assert
@@ -73,6 +74,44 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(reopened_tree.memory.page_size, 200)
             self.assertEqual(reopened_tree.memory.max_key_size, 7)
             self.assertEqual(reopened_tree.memory.max_value_size, 14)
+
+    def test_should_insert_new_items_into_bptree_without_splitting_root_node(self):
+        """
+        Should insert new items into a B+tree without splitting the root node.
+        """
+        with tmp_btree_file() as btree_file:
+            # arrange
+            tree: BPlusTree[int, str] = BPlusTree(btree_file, page_size=4096, max_key_size=40, max_value_size=100)
+
+            # act
+            tree.insert(5, "first key")
+            tree.insert(10, "second key")
+            tree.insert(15, "third key")
+            tree.insert(4, "fourth key")
+
+            # assert - tree root in memory
+            expected_records = [
+                LeafRecord(4, "fourth key"),
+                LeafRecord(5, "first key"),
+                LeafRecord(10, "second key"),
+                LeafRecord(15, "third key"),
+            ]
+
+            self.assertTrue(tree.root.is_leaf)
+            self.assertEqual(tree.root.records_count, 4)
+            self.assertListEqual(tree.root.leaf_records, expected_records)
+            self.assertEqual(tree.root.next_leaf_page, 0)
+            self.assertIsNone(tree.root.next_leaf)
+
+            # act - read from disk the tree node now
+            root_from_disk = tree.disk_read(1)  # page 1 is the root (0 is the tree settings)
+
+            # assert - tree root on disk
+            self.assertTrue(root_from_disk.is_leaf)
+            self.assertEqual(root_from_disk.records_count, 4)
+            self.assertListEqual(root_from_disk.leaf_records, expected_records)
+            self.assertEqual(root_from_disk.next_leaf_page, 0)
+            self.assertIsNone(root_from_disk.next_leaf)
 
     def create_paged_file_memory(
         self,

@@ -76,6 +76,7 @@ class BPTNode(Generic[KT, VT]):
         # leaf nodes
         self.leaf_records = list()
         self.next_leaf_page = 0
+        self.next_leaf = None
 
     def to_page(self, page_size: int, max_key_size: int, max_value_size: int, endianness: Endianness) -> bytes:
         """
@@ -109,14 +110,14 @@ class BPTNode(Generic[KT, VT]):
 
         start = end
         end += RECORDS_COUNT_BYTE_SPACE
-        records_count = int.from_bytes(data[start:end], endianess)
+        self.records_count = int.from_bytes(data[start:end], endianess)
 
         if self.is_leaf:
             start = end
             end += NODE_POINTER_BYTE_SPACE
             self.next_leaf_page = int.from_bytes(data[start:end], endianess)
 
-            for _ in range(0, records_count):
+            for _ in range(0, self.records_count):
                 start = end
                 end += max_key_size
                 key = self.key_serializer.from_bytes(data[start:end])
@@ -151,9 +152,6 @@ class BPTNode(Generic[KT, VT]):
             leaf_data += bytes(max_value_size - len(value_data))  # padding
 
         return leaf_data
-
-    def _deserialize_leaf_node(self, max_key_size: int, max_value_size: int, endianness: Endianness) -> BPTNode:
-        pass
 
     def _serialize_inner_node(self, max_key_size: int, endianness: Endianness) -> bytes:
         node_data = bytes()
