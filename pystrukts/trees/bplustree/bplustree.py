@@ -69,18 +69,18 @@ class BPlusTree(Generic[KT, VT]):
     def _create_root(self) -> BPTNode:
         root = BPTNode(True, self.key_serializer, self.value_serializer)
 
-        page_data = self.memory.allocate_page()
-        node_data = root.to_page(
-            self.memory.page_size, self.memory.max_key_size, self.memory.max_key_size, self.endianness
+        page_number = self.memory.allocate_page()
+        root_data = root.to_page(
+            self.memory.page_size, self.memory.max_key_size, self.memory.max_value_size, self.endianness
         )
+        self.memory.write_page(page_number, root_data)
 
-        self.memory.write_page(page_data, node_data)
         return root
 
     def _read_root(self) -> BPTNode:
         page_data = self.memory.read_page(1)  # page 0 is for tree metadata
 
-        loaded_root: BPTNode[KT, VT] = BPTNode()
+        loaded_root: BPTNode[KT, VT] = BPTNode(True, self.key_serializer, self.value_serializer)
         loaded_root.load_from_page(page_data, self.memory.max_key_size, self.memory.max_value_size, self.endianness)
 
         return loaded_root

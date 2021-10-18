@@ -66,13 +66,13 @@ class TestSuiteBPlusTree(unittest.TestCase):
             BPlusTree(btree_file, page_size=200, max_key_size=7, max_value_size=14)
 
             # act
-            tree_opened_again: BPlusTree[int, str] = BPlusTree(btree_file, page_size=200)
+            reopened_tree: BPlusTree[int, str] = BPlusTree(btree_file, page_size=200)
 
             # assert
-            self.assertEqual(tree_opened_again.memory.last_used_page, 1)
-            self.assertEqual(tree_opened_again.memory.page_size, 200)
-            self.assertEqual(tree_opened_again.memory.max_key_size, 7)
-            self.assertEqual(tree_opened_again.memory.max_value_size, 14)
+            self.assertEqual(reopened_tree.memory.last_used_page, 1)
+            self.assertEqual(reopened_tree.memory.page_size, 200)
+            self.assertEqual(reopened_tree.memory.max_key_size, 7)
+            self.assertEqual(reopened_tree.memory.max_value_size, 14)
 
     def create_paged_file_memory(
         self,
