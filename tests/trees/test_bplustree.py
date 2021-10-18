@@ -1,7 +1,8 @@
 import unittest
-from typing import Literal
 
-from pystrukts.trees.bplustree import PagedFileMemory
+from pystrukts._types.basic import Endianness
+from pystrukts.trees.bplustree.bplustree import BPlusTree
+from pystrukts.trees.bplustree.memory import PagedFileMemory
 from tests.trees.utils import tmp_btree_file
 
 
@@ -19,7 +20,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             memory = self.create_paged_file_memory(btree_file)
 
             # act
-            page_number = memory.allocate_node()
+            page_number = memory.allocate_page()
 
             # assert
             self.assertEqual(page_number, 1)  # page 0 is the tree settings page
@@ -28,9 +29,9 @@ class TestSuiteBPlusTree(unittest.TestCase):
             page_data = memory.read_page(page_number)
 
             # assert
-            expected_page_data = bytes(memory.memory_layout.page_size)
+            expected_page_data = bytes(memory.page_size)
 
-            self.assertEqual(len(page_data), memory.memory_layout.page_size)
+            self.assertEqual(len(page_data), memory.page_size)
             self.assertEqual(page_data.split(b"\n"), expected_page_data.split(b"\n"))
 
     def test_paged_file_memory_should_write_and_read_pages_from_disk(self):
@@ -56,12 +57,29 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(str_0, "bytearray page 0")
             self.assertEqual(str_1, "bytearray page 1")
 
+    def test_should_read_previous_tree_configuration_stored_on_disk(self):
+        """
+        Should read previous tree configuration stored on disk.
+        """
+        with tmp_btree_file() as btree_file:
+            # arrange - should store settings on disk
+            BPlusTree(btree_file, page_size=200, max_key_size=7, max_value_size=14)
+
+            # act
+            tree_opened_again: BPlusTree[int, str] = BPlusTree(btree_file, page_size=200)
+
+            # assert
+            self.assertEqual(tree_opened_again.memory.last_used_page, 1)
+            self.assertEqual(tree_opened_again.memory.page_size, 200)
+            self.assertEqual(tree_opened_again.memory.max_key_size, 7)
+            self.assertEqual(tree_opened_again.memory.max_value_size, 14)
+
     def create_paged_file_memory(
         self,
         tree_file: str,
         page_size: int = 4096,
         max_key_size: int = 8,
         max_value_size: int = 8,
-        endianness: Literal["little", "big"] = "big",
+        endianness: Endianness = "big",
     ) -> PagedFileMemory:
-        return PagedFileMemory(page_size, endianness, max_key_size, max_value_size, tree_file)
+        return PagedFileMemory(page_size, max_key_size, max_value_size, endianness, tree_file)
