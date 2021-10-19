@@ -47,7 +47,7 @@ class BPlusTree(Generic[KT, VT]):
         self.key_serializer = key_serializer if key_serializer is not None else DefaultSerializer[KT]()
         self.value_serializer = value_serializer if value_serializer is not None else DefaultSerializer[VT]()
         self.memory = PagedFileMemory(page_size, max_key_size, max_value_size, self.endianness, tree_file)
-        self.inner_degree = self._compute_degree()
+        self.inner_degree = self._compute_inner_degree()
         self.leaf_degree = self._compute_leaf_degree()
 
         if self.memory.is_new_file:
@@ -71,7 +71,7 @@ class BPlusTree(Generic[KT, VT]):
             self._swap_pages(old_root, new_root)
 
             # splits the new root's child (old root) which is full to add the new key/value
-            self._split_child(new_root, 0)  # single child: the old root
+            self._split_child(new_root, old_root, 0)
             self._insert_non_full(new_root, key, value)
         else:
             self._insert_non_full(self.root, key, value)
@@ -119,7 +119,6 @@ class BPlusTree(Generic[KT, VT]):
             node.records_count += 1
 
             self.disk_write(node)
-
         else:
             while i >= 0 and key < node.leaf_records[i].key:
                 i -= 1
@@ -130,35 +129,48 @@ class BPlusTree(Generic[KT, VT]):
             child_node = self.disk_read(child_node_page)
 
             if self._is_full(child_node):
-                # split child()
-
+                self._split_child(node, child_node, i)
                 if key > node.inner_records[i].key:
                     i += 1
+
+            # as splitting adds a new key in the current node, refetch child
+            child_node_page = node.inner_records[i].next_node_page
+            child_node = self.disk_read(child_node_page)
 
             self._insert_non_full(child_node, key, value)
 
     def _split_child(self, parent_node: BPTNode[KT, VT], child_node: BPTNode[KT, VT], i: int) -> None:
         """
+        Splits the child according to whether it is a leaf or inner node. Notice that the parent node must
+        be an inner node or it would not have children.
+        """
+        if child_node.is_leaf:
+            self._split_leaf_child(parent_node, child_node, i)
+        else:
+            self._split_inner_child(parent_node, child_node, i)
+
+    def _split_inner_child(self, parent_node: BPTNode[KT, VT], child_node: BPTNode[KT, VT], i: int) -> None:
+        """
         Splits the i-th full child of the given parent node. Notice that the parent node, as it has a child, is
         an inner node (non-leaf) but the child itself can either be a leaf or an inner-node.
         """
-        new_node = self._create_node(child_node.is_leaf)
-        new_node.records_count = self.leaf_degree - 1 if child_node.is_leaf else self.inner_degree
+        new_node = self._create_node(False)
+        new_node.records_count = self.inner_degree
 
         # copies lower part of the full child node to the new node
-        for j in range(0, self.leaf_degree - 1):
-            record = child_node.leaf_records[self.leaf_degree + j]
-            new_node.leaf_records.append(LeafRecord(record.key, record.value))
+        for j in range(0, self.inner_degree - 1):
+            record = child_node.inner_records[self.inner_degree + j]
+            new_node.inner_records.append(InnerRecord(record.key, record.next_node_page, record.next_node))
 
         # removes lower part that has been copied to halve the previously full child node
-        for _ in range(0, self.leaf_degree - 1):
-            child_node.leaf_records.pop(0)
+        for _ in range(0, self.inner_degree - 1):
+            child_node.inner_records.pop(0)
 
-        child_node.records_count = len(child_node.leaf_records)
+        child_node.records_count = len(child_node.inner_records)
 
         # inserts new key into the non-full inner node parent
         parent_node.inner_records.insert(
-            i, InnerRecord(child_node.leaf_records[i].key, child_node.disk_page, child_node)
+            i, InnerRecord(child_node.inner_records[i].key, child_node.disk_page, child_node)
         )
         parent_node.records_count += 1
 
@@ -170,7 +182,7 @@ class BPlusTree(Generic[KT, VT]):
     def _split_leaf_child(self, parent_node: BPTNode[KT, VT], child_node: BPTNode[KT, VT], i: int) -> None:
         """
         Splits the i-th full child of the given parent node. Notice that the parent node, as it has a child, is
-        an inner node (non-leaf).
+        an inner node and never a leaf node.
         """
         new_node = self._create_node(is_leaf=True)
         new_node.records_count = self.leaf_degree - 1
@@ -197,7 +209,7 @@ class BPlusTree(Generic[KT, VT]):
         self.disk_write(new_node)
         self.disk_write(parent_node)
 
-    def _compute_degree(self) -> int:
+    def _compute_inner_degree(self) -> int:
         """
         Computes the degree (t) of the B+tree in order to use to decide when a given node is full or not. Here
         the degree of the tree is computed based on the amount of records that are able to fit a single disk page.
@@ -220,7 +232,7 @@ class BPlusTree(Generic[KT, VT]):
 
         return degree
 
-    def _compute_leaf_degree(self):
+    def _compute_leaf_degree(self) -> int:
         """
         Computes the degree (t) of the B+tree for leaf nodes as their memory layout is different than inner nodes as
         key values take up more space. As a consequence, a leaf node becomes full with less records than an inner

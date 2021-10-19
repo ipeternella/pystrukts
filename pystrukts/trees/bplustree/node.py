@@ -41,6 +41,7 @@ class BPTNode(Generic[KT, VT]):
     """
 
     # node metadata
+    disk_page: int
     is_leaf: bool
     records_count: int
 
@@ -59,10 +60,12 @@ class BPTNode(Generic[KT, VT]):
     def __init__(
         self,
         is_leaf: bool = True,
+        disk_page: int = 0,
         key_serializer: Serializer[KT] = DefaultSerializer(),
         value_serializer: Serializer[VT] = DefaultSerializer(),
     ) -> None:
         # node metadata
+        self.disk_page = disk_page
         self.is_leaf = is_leaf
         self.records_count = 0
 
