@@ -113,6 +113,40 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(root_from_disk.next_leaf_page, 0)
             self.assertIsNone(root_from_disk.next_leaf)
 
+    def test_should_insert_items_on_bplustree_until_root_is_split(self):
+        """
+        Should insert items on a B+tree until root is split.
+        """
+        with tmp_btree_file() as btree_file:
+            # arrange - t == 2 for leaves
+            tree: BPlusTree[int, int] = BPlusTree(btree_file, page_size=39, max_key_size=5, max_value_size=5)
+
+            # act - insert until root node is split
+            tree.insert(1, 1)
+            tree.insert(2, 2)
+            tree.insert(3, 3)
+            tree.insert(4, 4)
+
+            self.assertFalse(tree.root.is_leaf)  # after split, root is not a leaf anymore
+            self.assertEqual(tree.root.records_count, 1)
+            self.assertEqual(tree.root.inner_records[0].key, 2)
+
+            # first child of the root is a leaf node with (key, value) == (1, 1)
+            self.assertTrue(tree.root.first_node.is_leaf)
+            self.assertEqual(len(tree.root.first_node.leaf_records), 1)
+            self.assertEqual(tree.root.first_node.leaf_records[0].key, 1)
+            self.assertEqual(tree.root.first_node.leaf_records[0].value, 1)
+
+            # second child of the root is a leaf node with two key vals: (3, 3), (4, 4)
+            self.assertTrue(tree.root.inner_records[0].next_node.is_leaf)
+            self.assertEqual(len(tree.root.inner_records[0].next_node.leaf_records), 2)
+
+            self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[0].key, 3)
+            self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[0].value, 3)
+
+            self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[1].key, 4)
+            self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[1].value, 4)
+
     def create_paged_file_memory(
         self,
         tree_file: str,

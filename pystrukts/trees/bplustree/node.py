@@ -43,7 +43,6 @@ class BPTNode(Generic[KT, VT]):
     # node metadata
     disk_page: int
     is_leaf: bool
-    records_count: int
 
     # serializers
     key_serializer: Serializer[KT]
@@ -51,6 +50,8 @@ class BPTNode(Generic[KT, VT]):
 
     # inner node properties
     inner_records: List[InnerRecord[KT, VT]]
+    first_node_page: int
+    first_node: Optional[BPTNode[KT, VT]]
 
     # leaf node properties
     leaf_records: List[LeafRecord[KT, VT]]
@@ -67,7 +68,6 @@ class BPTNode(Generic[KT, VT]):
         # node metadata
         self.disk_page = disk_page
         self.is_leaf = is_leaf
-        self.records_count = 0
 
         # serializers
         self.key_serializer = key_serializer
@@ -75,11 +75,20 @@ class BPTNode(Generic[KT, VT]):
 
         # inner nodes
         self.inner_records = list()
+        self.first_node = None
+        self.first_node_page = 0
 
         # leaf nodes
         self.leaf_records = list()
         self.next_leaf_page = 0
         self.next_leaf = None
+
+    @property
+    def records_count(self) -> int:
+        if self.is_leaf:
+            return len(self.leaf_records)
+
+        return len(self.inner_records)
 
     def to_page(self, page_size: int, max_key_size: int, max_value_size: int, endianness: Endianness) -> bytes:
         """
@@ -113,14 +122,14 @@ class BPTNode(Generic[KT, VT]):
 
         start = end
         end += RECORDS_COUNT_BYTE_SPACE
-        self.records_count = int.from_bytes(data[start:end], endianess)
+        records_count = int.from_bytes(data[start:end], endianess)
 
         if self.is_leaf:
             start = end
             end += NODE_POINTER_BYTE_SPACE
             self.next_leaf_page = int.from_bytes(data[start:end], endianess)
 
-            for _ in range(0, self.records_count):
+            for _ in range(0, records_count):
                 start = end
                 end += max_key_size
                 key = self.key_serializer.from_bytes(data[start:end])
@@ -131,7 +140,20 @@ class BPTNode(Generic[KT, VT]):
 
                 self.leaf_records.append(LeafRecord(key, value))
         else:
-            pass
+            start = end
+            end += NODE_POINTER_BYTE_SPACE
+            self.first_node_page = int.from_bytes(data[start:end], endianess)
+
+            for _ in range(0, records_count):
+                start = end
+                end += NODE_POINTER_BYTE_SPACE
+                next_node_page = int.from_bytes(data[start:end], endianess)
+
+                start = end
+                end += max_key_size
+                key = self.key_serializer.from_bytes(data[start:end])
+
+                self.inner_records.append(InnerRecord(key, next_node_page, None))
 
     def _serialize_leaf_node(self, max_key_size: int, max_value_size: int, endianness: Endianness) -> bytes:
         leaf_data = bytes()
@@ -157,17 +179,18 @@ class BPTNode(Generic[KT, VT]):
         return leaf_data
 
     def _serialize_inner_node(self, max_key_size: int, endianness: Endianness) -> bytes:
-        node_data = bytes()
+        inner_data = bytes()
+        inner_data += self.next_leaf_page.to_bytes(NODE_POINTER_BYTE_SPACE, endianness)
 
         # page payload
         for inner_record in self.inner_records:
-            node_data += inner_record.next_node_page.to_bytes(NODE_POINTER_BYTE_SPACE, endianness)
+            inner_data += inner_record.next_node_page.to_bytes(NODE_POINTER_BYTE_SPACE, endianness)
             key_data = self.key_serializer.to_bytes(inner_record.key)
 
             if len(key_data) > max_key_size:
                 raise ValueError(f"key: {inner_record.key} size exceeds max key size: {max_key_size}")
 
-            node_data += key_data
-            node_data += bytes(max_key_size - len(key_data))  # padding
+            inner_data += key_data
+            inner_data += bytes(max_key_size - len(key_data))  # padding
 
-        return node_data
+        return inner_data

@@ -10,22 +10,22 @@ Metadata page memory layout:
 
 Inner nodes memory layout:
 
-+------------------------- disk page size ----------------- ... -+
-| node_type |  records_count |  node_pointer |    key    |  ...  |
-|   1 byte  |     4 bytes    |    4 bytes    |  K bytes  |  ...  |
-+----------------------------------------------------------------+
- ^~~~~~~ page headers ~~~~~~^ ^~~~ each inner record ~~~~^  ...
++------------------------------- disk page size ------------------------------- ... -+
+| node_type |  records_count | first_node_pointer | node_pointer |    key    |  ...  |
+|   1 byte  |     4 bytes    |       4 bytes      |   4 bytes    |  K bytes  |  ...  |
++-------------------------------------------------------------------------------...--+
+ ^~~~~~~~~~~~~~~~~~ page headers ~~~~~~~~~~~~~~~~^ ^~~~ each inner record ~~~~^
 
 where K = user-defined max key size (which must fit the page size)
 
 Leaf nodes have a different memory layout, so the max. amount of children (2*degree - 1)
 it can sustain is different than inner nodes (that only stores keys and node pointers):
 
-+------------------------- disk page size ----------------------------------- ... -+
++-------------------------------- disk page size ---------------------------- ... -+
 | node_type |  records_count |  next_leaf_pointer |    key    |   value    |  ...  |
 |   1 byte  |     4 bytes    |       4 bytes      |  K bytes  |   V bytes  |  ...  |
-+----------------------------------------------------------------------------------+
-^~~~~~~~~~~~~~~~~~~ page headers ~~~~~~~~~~~~~~~~^ ^~~ each leaf record ~~~^  ...
++-----------------------------------------------------------------------------...--+
+^~~~~~~~~~~~~~~~~~~ page headers ~~~~~~~~~~~~~~~~^ ^~~ each leaf record ~~~^
 
 where K = user-defined max key size, V = user-defined max value size
 """

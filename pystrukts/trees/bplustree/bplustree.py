@@ -65,10 +65,11 @@ class BPlusTree(Generic[KT, VT]):
             # new root is never a leaf node
             new_root = self._create_node(is_leaf=False)
             self.root = new_root
-            new_root.inner_records[0] = InnerRecord(key, old_root.disk_page, old_root)
+            self._swap_pages(old_root, new_root)  # swap disk pages so that the new root stays on page 1
 
-            # swap disk pages so that the new root stays on page 1
-            self._swap_pages(old_root, new_root)
+            # first node pointer is always created upon inner split
+            new_root.first_node = old_root
+            new_root.first_node_page = old_root.disk_page
 
             # splits the new root's child (old root) which is full to add the new key/value
             self._split_child(new_root, old_root, 0)
@@ -116,17 +117,15 @@ class BPlusTree(Generic[KT, VT]):
 
             # shift keys right to find a new spot for the new key
             node.leaf_records.insert(i + 1, new_record)
-            node.records_count += 1
 
             self.disk_write(node)
         else:
-            while i >= 0 and key < node.leaf_records[i].key:
+            while i >= 0 and key < node.inner_records[i].key:
                 i -= 1
-
-            i += 1
 
             child_node_page = node.inner_records[i].next_node_page
             child_node = self.disk_read(child_node_page)
+            node.inner_records[i].next_node = child_node
 
             if self._is_full(child_node):
                 self._split_child(node, child_node, i)
@@ -136,6 +135,7 @@ class BPlusTree(Generic[KT, VT]):
             # as splitting adds a new key in the current node, refetch child
             child_node_page = node.inner_records[i].next_node_page
             child_node = self.disk_read(child_node_page)
+            node.inner_records[i].next_node = child_node
 
             self._insert_non_full(child_node, key, value)
 
@@ -154,25 +154,22 @@ class BPlusTree(Generic[KT, VT]):
         Splits the i-th full child of the given parent node. Notice that the parent node, as it has a child, is
         an inner node (non-leaf) but the child itself can either be a leaf or an inner-node.
         """
-        new_node = self._create_node(False)
-        new_node.records_count = self.inner_degree
+        new_node = self._create_node(is_leaf=False)  # creates a new inner node
+        degree = self.inner_degree
 
         # copies lower part of the full child node to the new node
-        for j in range(0, self.inner_degree - 1):
-            record = child_node.inner_records[self.inner_degree + j]
+        for j in range(0, degree - 1):
+            record = child_node.inner_records[degree + j]
             new_node.inner_records.append(InnerRecord(record.key, record.next_node_page, record.next_node))
 
-        # removes lower part that has been copied to halve the previously full child node
-        for _ in range(0, self.inner_degree - 1):
-            child_node.inner_records.pop(0)
+            # removes copied nodes from child node
+            child_node.leaf_records.pop(degree + j)
 
-        child_node.records_count = len(child_node.inner_records)
-
-        # inserts new key into the non-full inner node parent
+        # inserts new key into the non-full inner node parent and make it point to the new node
         parent_node.inner_records.insert(
-            i, InnerRecord(child_node.inner_records[i].key, child_node.disk_page, child_node)
+            i, InnerRecord(child_node.inner_records[degree - 1].key, new_node.disk_page, new_node)
         )
-        parent_node.records_count += 1
+        child_node.inner_records.pop(degree - 1)  # removes the split key from the child to 'pass' it to the parent
 
         # disk persistance of the split
         self.disk_write(child_node)
@@ -185,24 +182,21 @@ class BPlusTree(Generic[KT, VT]):
         an inner node and never a leaf node.
         """
         new_node = self._create_node(is_leaf=True)
-        new_node.records_count = self.leaf_degree - 1
+        degree = self.leaf_degree
 
         # copies lower part of the full child node to the new node
-        for j in range(0, self.leaf_degree - 1):
-            record = child_node.leaf_records[self.leaf_degree + j]
+        for j in range(0, degree - 1):
+            record = child_node.leaf_records[degree + j]
             new_node.leaf_records.append(LeafRecord(record.key, record.value))
 
-        # removes lower part that has been copied to halve the previously full child node
-        for _ in range(0, self.leaf_degree - 1):
-            child_node.leaf_records.pop(0)
+            # removes copied nodes from child node
+            child_node.leaf_records.pop(degree + j)
 
-        child_node.records_count = len(child_node.leaf_records)
-
-        # inserts new key into the non-full inner node parent
+        # inserts new key into the non-full inner node parent and make it point to the new node
         parent_node.inner_records.insert(
-            i, InnerRecord(child_node.leaf_records[i].key, child_node.disk_page, child_node)
+            i, InnerRecord(child_node.leaf_records[degree - 1].key, new_node.disk_page, new_node)
         )
-        parent_node.records_count += 1
+        child_node.leaf_records.pop(degree - 1)  # removes the split key from the child to 'pass' it to the parent
 
         # disk persistance of the split
         self.disk_write(child_node)
