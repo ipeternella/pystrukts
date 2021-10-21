@@ -127,6 +127,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             tree.insert(3, 3)
             tree.insert(4, 4)
 
+            # assert - root (inner node) and leaf nodes
             self.assertFalse(tree.root.is_leaf)  # after split, root is not a leaf anymore
             self.assertEqual(tree.root.records_count, 1)
             self.assertEqual(tree.root.inner_records[0].key, 2)
@@ -149,7 +150,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[1].key, 4)
             self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[1].value, 4)
 
-            # act
+            # act and assert - search for keys in the tree and assert
             self.assertEqual(tree.get(1), 1)
             self.assertEqual(tree.get(2), 2)
             self.assertEqual(tree.get(3), 3)
