@@ -82,19 +82,23 @@ class TestSuiteBPlusTree(unittest.TestCase):
         with tmp_btree_file() as btree_file:
             # arrange
             tree: BPlusTree[int, str] = BPlusTree(btree_file, page_size=4096, max_key_size=40, max_value_size=100)
+            value_5 = "value 5"
+            value_10 = "value 10"
+            value_15 = "value 15"
+            value_4 = "value 4"
 
             # act
-            tree.insert(5, "first key")
-            tree.insert(10, "second key")
-            tree.insert(15, "third key")
-            tree.insert(4, "fourth key")
+            tree.insert(5, value_5)
+            tree.insert(10, value_10)
+            tree.insert(15, value_15)
+            tree.insert(4, value_4)
 
             # assert - tree root in memory
             expected_records = [
-                LeafRecord(4, "fourth key"),
-                LeafRecord(5, "first key"),
-                LeafRecord(10, "second key"),
-                LeafRecord(15, "third key"),
+                LeafRecord(4, value_4),
+                LeafRecord(5, value_5),
+                LeafRecord(10, value_10),
+                LeafRecord(15, value_15),
             ]
 
             self.assertTrue(tree.root.is_leaf)
@@ -114,8 +118,8 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertIsNone(root_from_disk.next_leaf)
 
             # act and assert - search the tree for the keys without root splitting
-            self.assertEqual(tree.get(15), "third key")
-            self.assertEqual(tree.get(4), "fourth key")
+            self.assertEqual(tree.get(15), value_15)
+            self.assertEqual(tree.get(4), value_4)
 
     def test_should_insert_items_on_bplustree_until_root_is_split_and_find_keys_on_the_bplustree(self):
         """
@@ -165,7 +169,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             # act - load tree from disk
             tree_from_disk: BPlusTree[int, int] = BPlusTree(btree_file)
 
-            # assert nodes
+            # assert - nodes
             self.assertEqual(tree_from_disk.get(1), 1)
             self.assertEqual(tree_from_disk.get(2), 2)
             self.assertEqual(tree_from_disk.get(3), 3)
