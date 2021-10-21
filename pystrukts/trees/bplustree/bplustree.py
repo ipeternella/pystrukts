@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Generic
 from typing import Optional
+from typing import Tuple
 
 from pystrukts._types.basic import Endianness
 from pystrukts._types.basic import StrPath
@@ -57,7 +58,8 @@ class BPlusTree(Generic[KT, VT]):
 
     def insert(self, key: KT, value: VT) -> None:
         """
-        Inserts a new key and value on the B+tree.
+        Inserts a new key and value on the B+tree. Splits the root node or children nodes
+        as the max number of keys are exceeded on the nodes according to the tree's degree.
         """
         if self._is_full(self.root):
             old_root = self.root
@@ -77,14 +79,71 @@ class BPlusTree(Generic[KT, VT]):
         else:
             self._insert_non_full(self.root, key, value)
 
-    def disk_write(self, node: BPTNode[KT, VT]) -> None:
+    def get(self, key: KT) -> Optional[VT]:
+        """
+        Looks for a key on the B+tree. If it's not found, returns None.
+        """
+        result = self._get(self.root, key)
+
+        if result is not None:
+            node, i = result  # only leaf nodes can contain values, so we have a leaf node
+            return node.leaf_records[i].value
+
+        return None
+
+    def _get(self, node: BPTNode[KT, VT], key: KT) -> Optional[Tuple[BPTNode[KT, VT], int]]:
+        """
+        Finds a leaf node along with it's corresponding index int of its 'leaf_records' array
+        containg the record with the value associated with the given key. If no such node is found,
+        returns None.
+        """
+        i = 0
+
+        if node.is_leaf:
+            while i < node.records_count and key > node.leaf_records[i].key:
+                i += 1
+
+            if i < node.records_count and key == node.leaf_records[i].key:
+                return node, i
+
+            return None
+
+        # inner node searching
+        while i < node.records_count and key > node.inner_records[i].key:
+            i += 1
+
+        # here we have an inner node, if i == 0, it's smaller than all keys
+        # so look at the first child page (out of the inner_records)
+        if i == 0:
+            next_node_page = node.first_node_page
+            next_node = node.first_node
+        else:
+            i -= 1  # [!]: key is bigger than first page keys, but inner_records starts at i == 0
+
+            next_node_page = node.inner_records[i].next_node_page
+            next_node = node.inner_records[i].next_node
+
+        # check if the next inner node is in memory
+        if next_node is not None:
+            return self._get(next_node, key)
+
+        # if not in memory, read it from disk and perform recursion
+        return self._get(self._disk_read(next_node_page), key)
+
+    def _disk_write(self, node: BPTNode[KT, VT]) -> None:
+        """
+        Writes a given node to disk according to its page attribute by calling the memory allocator.
+        """
         node_page = node.disk_page
         node_data = node.to_page(
             self.memory.page_size, self.memory.max_key_size, self.memory.max_value_size, self.endianness
         )
         self.memory.write_page(node_page, node_data)
 
-    def disk_read(self, node_page: int) -> BPTNode[KT, VT]:
+    def _disk_read(self, node_page: int) -> BPTNode[KT, VT]:
+        """
+        Reads a given node from disk according to its page attribute by calling the memory allocator.
+        """
         page_data = self.memory.read_page(node_page)
 
         node_from_disk: BPTNode[KT, VT] = BPTNode(True, node_page, self.key_serializer, self.value_serializer)
@@ -118,13 +177,13 @@ class BPlusTree(Generic[KT, VT]):
             # shift keys right to find a new spot for the new key
             node.leaf_records.insert(i + 1, new_record)
 
-            self.disk_write(node)
+            self._disk_write(node)
         else:
             while i >= 0 and key < node.inner_records[i].key:
                 i -= 1
 
             child_node_page = node.inner_records[i].next_node_page
-            child_node = self.disk_read(child_node_page)
+            child_node = self._disk_read(child_node_page)
             node.inner_records[i].next_node = child_node
 
             if self._is_full(child_node):
@@ -134,7 +193,7 @@ class BPlusTree(Generic[KT, VT]):
 
             # as splitting adds a new key in the current node, refetch child
             child_node_page = node.inner_records[i].next_node_page
-            child_node = self.disk_read(child_node_page)
+            child_node = self._disk_read(child_node_page)
             node.inner_records[i].next_node = child_node
 
             self._insert_non_full(child_node, key, value)
@@ -172,9 +231,9 @@ class BPlusTree(Generic[KT, VT]):
         child_node.inner_records.pop(degree - 1)  # removes the split key from the child to 'pass' it to the parent
 
         # disk persistance of the split
-        self.disk_write(child_node)
-        self.disk_write(new_node)
-        self.disk_write(parent_node)
+        self._disk_write(child_node)
+        self._disk_write(new_node)
+        self._disk_write(parent_node)
 
     def _split_leaf_child(self, parent_node: BPTNode[KT, VT], child_node: BPTNode[KT, VT], i: int) -> None:
         """
@@ -196,12 +255,12 @@ class BPlusTree(Generic[KT, VT]):
         parent_node.inner_records.insert(
             i, InnerRecord(child_node.leaf_records[degree - 1].key, new_node.disk_page, new_node)
         )
-        child_node.leaf_records.pop(degree - 1)  # removes the split key from the child to 'pass' it to the parent
+        # child_node.leaf_records.pop(degree - 1)  # removes the split key from the child to 'pass' it to the parent
 
         # disk persistance of the split
-        self.disk_write(child_node)
-        self.disk_write(new_node)
-        self.disk_write(parent_node)
+        self._disk_write(child_node)
+        self._disk_write(new_node)
+        self._disk_write(parent_node)
 
     def _compute_inner_degree(self) -> int:
         """
@@ -263,16 +322,22 @@ class BPlusTree(Generic[KT, VT]):
         node_1.disk_page = node_2.disk_page
         node_2.disk_page = disk_page_1
 
-        self.disk_write(node_1)
-        self.disk_write(node_2)
+        self._disk_write(node_1)
+        self._disk_write(node_2)
 
     def _create_root(self) -> BPTNode[KT, VT]:
+        """
+        Creates a new root for the B+tree (when the B+tree's file is new).
+        """
         page_number = self.memory.allocate_page()
 
         root = BPTNode(True, page_number, self.key_serializer, self.value_serializer)
-        self.disk_write(root)
+        self._disk_write(root)
 
         return root
 
     def _read_root(self) -> BPTNode[KT, VT]:
-        return self.disk_read(1)  # root is always stored on page 1 (page 0 for tree metadata)
+        """
+        Reads a previous root of the B+tree from it's B+tree file.
+        """
+        return self._disk_read(1)  # root is always stored on page 1 (page 0 for tree metadata)

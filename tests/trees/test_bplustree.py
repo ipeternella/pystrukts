@@ -104,7 +104,7 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertIsNone(tree.root.next_leaf)
 
             # act - read from disk the tree node now
-            root_from_disk = tree.disk_read(1)  # page 1 is the root (0 is the tree settings)
+            root_from_disk = tree._disk_read(1)  # page 1 is the root (0 is the tree settings)
 
             # assert - tree root on disk
             self.assertTrue(root_from_disk.is_leaf)
@@ -113,9 +113,9 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(root_from_disk.next_leaf_page, 0)
             self.assertIsNone(root_from_disk.next_leaf)
 
-    def test_should_insert_items_on_bplustree_until_root_is_split(self):
+    def test_should_insert_items_on_bplustree_until_root_is_split_and_find_keys_on_the_bplustree(self):
         """
-        Should insert items on a B+tree until root is split.
+        Should insert items on a B+tree until root is split and find keys on the B+tree.
         """
         with tmp_btree_file() as btree_file:
             # arrange - t == 2 for leaves
@@ -131,21 +131,31 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(tree.root.records_count, 1)
             self.assertEqual(tree.root.inner_records[0].key, 2)
 
-            # first child of the root is a leaf node with (key, value) == (1, 1)
+            # first child of the root is a leaf node with two keys <= 2: {1: 1, 2: 2}
             self.assertTrue(tree.root.first_node.is_leaf)
-            self.assertEqual(len(tree.root.first_node.leaf_records), 1)
+            self.assertEqual(tree.root.first_node.records_count, 2)
             self.assertEqual(tree.root.first_node.leaf_records[0].key, 1)
             self.assertEqual(tree.root.first_node.leaf_records[0].value, 1)
+            self.assertEqual(tree.root.first_node.leaf_records[1].key, 2)
+            self.assertEqual(tree.root.first_node.leaf_records[1].value, 2)
 
-            # second child of the root is a leaf node with two key vals: (3, 3), (4, 4)
+            # second child of the root is a leaf node with two keys > 2: {3: 3, 4: 4}
             self.assertTrue(tree.root.inner_records[0].next_node.is_leaf)
-            self.assertEqual(len(tree.root.inner_records[0].next_node.leaf_records), 2)
+            self.assertEqual(tree.root.inner_records[0].next_node.records_count, 2)
 
             self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[0].key, 3)
             self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[0].value, 3)
 
             self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[1].key, 4)
             self.assertEqual(tree.root.inner_records[0].next_node.leaf_records[1].value, 4)
+
+            # act
+            self.assertEqual(tree.get(1), 1)
+            self.assertEqual(tree.get(2), 2)
+            self.assertEqual(tree.get(3), 3)
+            self.assertEqual(tree.get(4), 4)
+            self.assertIsNone(tree.get(101))
+            self.assertIsNone(tree.get(-1))
 
     def create_paged_file_memory(
         self,
