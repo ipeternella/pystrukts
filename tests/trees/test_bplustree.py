@@ -158,6 +158,17 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertIsNone(tree.get(101))
             self.assertIsNone(tree.get(-1))
 
+            # act - load tree from disk
+            tree_from_disk: BPlusTree[int, int] = BPlusTree(btree_file)
+
+            # assert nodes
+            self.assertEqual(tree_from_disk.get(1), 1)
+            self.assertEqual(tree_from_disk.get(2), 2)
+            self.assertEqual(tree_from_disk.get(3), 3)
+            self.assertEqual(tree_from_disk.get(4), 4)
+            self.assertIsNone(tree_from_disk.get(101))
+            self.assertIsNone(tree_from_disk.get(-1))
+
     def create_paged_file_memory(
         self,
         tree_file: str,

@@ -180,7 +180,7 @@ class BPTNode(Generic[KT, VT]):
 
     def _serialize_inner_node(self, max_key_size: int, endianness: Endianness) -> bytes:
         inner_data = bytes()
-        inner_data += self.next_leaf_page.to_bytes(NODE_POINTER_BYTE_SPACE, endianness)
+        inner_data += self.first_node_page.to_bytes(NODE_POINTER_BYTE_SPACE, endianness)
 
         # page payload
         for inner_record in self.inner_records:
