@@ -113,6 +113,10 @@ class TestSuiteBPlusTree(unittest.TestCase):
             self.assertEqual(root_from_disk.next_leaf_page, 0)
             self.assertIsNone(root_from_disk.next_leaf)
 
+            # act and assert - search the tree for the keys without root splitting
+            self.assertEqual(tree.get(15), "third key")
+            self.assertEqual(tree.get(4), "fourth key")
+
     def test_should_insert_items_on_bplustree_until_root_is_split_and_find_keys_on_the_bplustree(self):
         """
         Should insert items on a B+tree until root is split and find keys on the B+tree.
