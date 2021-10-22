@@ -255,7 +255,6 @@ class BPlusTree(Generic[KT, VT]):
         parent_node.inner_records.insert(
             i, InnerRecord(child_node.leaf_records[degree - 1].key, new_node.disk_page, new_node)
         )
-        # child_node.leaf_records.pop(degree - 1)  # removes the split key from the child to 'pass' it to the parent
 
         # disk persistance of the split
         self._disk_write(child_node)
