@@ -4,6 +4,8 @@ Module with fibonacci computation problems which can be solved with dynamic prog
 
 
 from typing import Dict
+from typing import List
+from typing import Optional
 
 
 def fibonacci_bruteforce(n: int) -> int:
@@ -20,19 +22,40 @@ def fibonacci_bruteforce(n: int) -> int:
     return fibonacci_bruteforce(n - 1) + fibonacci_bruteforce(n - 2)
 
 
-def fibonacci_memoized(n: int, memory: Dict[int, int] = dict()) -> int:
+def fibonacci_memoized(n: int, memory: Optional[Dict[int, int]] = None) -> int:
     """
     Optimized version of the n-th Fibonacci number computation with memoization.
     Time complexity: O(n).
     """
+    # memoization
+    if memory is None:
+        memory = dict()
+
     if memo := memory.get(n):
         return memo
 
+    # trivial cases
     if n == 0:
         return 0
 
     if n <= 2:
         return 1
 
-    memory[n] = fibonacci_memoized(n - 1) + fibonacci_memoized(n - 2)
+    # recursion
+    memory[n] = fibonacci_memoized(n - 1, memory) + fibonacci_memoized(n - 2, memory)
     return memory[n]
+
+
+def fibonacci_bottomup(n: int) -> int:
+    """
+    Optimized version of the n-th Fibonacci number computation with tabulation.
+    """
+    # initialization of (n + 1) elements: [0, 1, 1, ...] to store previously solved subproblems.
+    solutions = [0] * (n + 1)
+    solutions[1:3] = [1, 1]
+
+    # loop for solving from bottom up
+    for i in range(0, n - 1):
+        solutions[i + 2] = solutions[i] + solutions[i + 1]
+
+    return solutions[n]

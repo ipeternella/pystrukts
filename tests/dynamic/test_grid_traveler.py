@@ -14,8 +14,7 @@ class DynamicGridTravelerTestSuite(unittest.TestCase):
 
     def test_should_count_possible_ways_grid2D_bruteforce_on_2x3(self):
         """
-        Should count the possible ways to travel on a 2D grid 2x3 with
-        the naive algorithm.
+        Should count the possible ways to travel on a 2D grid 2x3 with the brute-force algorithm.
         """
         # arrange
         m = 2
@@ -29,7 +28,7 @@ class DynamicGridTravelerTestSuite(unittest.TestCase):
 
     def test_should_count_possible_ways_grid2D_memoized_on_18x18(self):
         """
-        Should quickly compute possible ways for a large grid of 18x18.
+        Should quickly compute possible ways for a large grid of 18x18 using memoized optimization.
         """
         # arrange
         m = 18
