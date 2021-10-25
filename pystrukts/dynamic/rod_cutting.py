@@ -14,8 +14,8 @@ def cut_rod_max_revenue(length: int, prices: List[int]) -> int:
     The prices list must be of size length + 1 (to include the price zero at ix == 0).
 
     Example:
-                                v˜˜˜ ix is the cut rod length ˜˜˜v
-    >>> cut_rod_max_revenue(9, [0, 1, 5, 8, 9, 10, 17, 17, 20, 24])
+                                   v˜˜˜˜ each ix holds the price of a rod of ix length!
+    >>> cut_rod_max_revenue(4, [0, 1, 5, 8, 9])
     >>> 10  # maximum revenue
     """
     if len(prices) < length + 1:
