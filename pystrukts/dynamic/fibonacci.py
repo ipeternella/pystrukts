@@ -2,9 +2,7 @@
 Module with fibonacci computation problems which can be solved with dynamic programming.
 """
 
-
 from typing import Dict
-from typing import List
 from typing import Optional
 
 
@@ -31,8 +29,8 @@ def fibonacci_memoized(n: int, memory: Optional[Dict[int, int]] = None) -> int:
     if memory is None:
         memory = dict()
 
-    if memo := memory.get(n):
-        return memo
+    if n in memory:
+        return memory[n]
 
     # trivial cases
     if n == 0:
@@ -50,9 +48,8 @@ def fibonacci_bottomup(n: int) -> int:
     """
     Optimized version of the n-th Fibonacci number computation with tabulation.
     """
-    # initialization of (n + 1) elements: [0, 1, 1, ...] to store previously solved subproblems.
-    solutions = [0] * (n + 1)
-    solutions[1:3] = [1, 1]
+    # initialization of (n + 1) elements: [0, 1, 1, ...] to store the previous solutions
+    solutions = [0, 1, 1] + [0] * (n - 1)
 
     # loop for solving from bottom up
     for i in range(0, n - 1):

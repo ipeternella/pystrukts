@@ -3,6 +3,7 @@ Module with grid-traveling problems which can be solved with dynamic programming
 """
 
 from typing import Dict
+from typing import List
 from typing import Optional
 from typing import Tuple
 
@@ -54,3 +55,12 @@ def count_possible_ways_grid2D_memoized(m: int, n: int, memory: Optional[Dict[Pa
     )
 
     return memory[pair]
+
+
+def count_possible_ways_grid2D_bottomup(m: int, n: int) -> int:
+    # trivial solutions for bottomup
+    solutions: List[List[int]] = [[0] * n] * m
+    solutions[0][0] = 0
+    solutions[0][1] = 0
+    solutions[1][0] = 0
+    solutions[1][1] = 1
