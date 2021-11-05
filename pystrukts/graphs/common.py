@@ -180,7 +180,6 @@ class Graph(Generic[T]):
         while queue.is_empty() is False:
             current_vertex: Vertex[T] = queue.dequeue()  # type: ignore
             adjacent_vertices = current_vertex.adjacent
-            print(current_vertex)
 
             for next_vertex in adjacent_vertices:
 
