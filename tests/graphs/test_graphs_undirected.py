@@ -83,10 +83,6 @@ class TestSuiteGraph(unittest.TestCase):
         # arrange
         g = self.create_graph_1()
         vertex_1 = g.get_vertex(1)
-        vertex_2 = g.get_vertex(2)
-        vertex_3 = g.get_vertex(2)
-
-        self.assertEqual(vertex_1.distance, -1)
 
         # act
         g.bfs(source=vertex_1)

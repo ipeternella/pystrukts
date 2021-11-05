@@ -74,8 +74,8 @@ class Edge(Generic[T]):
 
 class Graph(Generic[T]):
     """
-    Represents an undirected graph implemented with adjacency lists. The edges are represented as
-    with a separate class and stored on a hashmap (dict) of tuples of the pair of vertices of the edge.
+    Represents an undirected graph implemented with adjacency lists. The edges are represented using
+    a specific Edge class and stored on a hashmap composed of tuples of vertices pairs.
     """
 
     vertices: Dict[T, Vertex[T]]
@@ -166,7 +166,7 @@ class Graph(Generic[T]):
         if source.key not in self.vertices:
             raise ValueError(f"Vertice with key {source.key} was not found in the graph!")
 
-        self.reset()  # reset graph back to its state
+        self.reset()  # reset graph's vertices back to their original state
 
         source.color = VertexColor.GRAY
         source.distance = 0
