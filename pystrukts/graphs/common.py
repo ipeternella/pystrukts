@@ -1,8 +1,9 @@
 """
-Module with undirected graph implementations.
+Module with graph implementations.
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict
@@ -74,7 +75,7 @@ class Edge(Generic[T]):
 
 class Graph(Generic[T]):
     """
-    Represents an undirected graph implemented with adjacency lists. The edges are represented using
+    Represents a graph implemented with adjacency lists. The edges are represented using
     a specific Edge class and stored on a hashmap composed of tuples of vertices pairs.
     """
 
@@ -160,8 +161,9 @@ class Graph(Generic[T]):
 
     def bfs(self, source: Vertex[T]) -> None:
         """
-        Breadth-first algorithm for traversing/exploring the graph from a given source vertex. If such source is not
-        found, it raises ValueError.
+        Breadth-first (BFS) algorithm for traversing/exploring the graph from a given source vertex. If such source
+        is not found, it raises ValueError. Vertices that are not any path starting from the source vertex are not
+        traversed (unlike in DFS which uses several source vertices).
         """
         if source.key not in self.vertices:
             raise ValueError(f"Vertice with key {source.key} was not found in the graph!")
@@ -189,3 +191,31 @@ class Graph(Generic[T]):
                     queue.enqueue(next_vertex.key, next_vertex)
 
             current_vertex.color = VertexColor.BLACK
+
+    def dfs(self) -> None:
+        """
+        Depth-first (DFS) algorithm for traversing the graph. Unlike BFS whose source vertex is fixed, DFS will
+        traverse all vertices so many sources can possibly be used in a way that even disconnected vertices or
+        parts of the graph will also be traversed.
+        """
+        self.reset()
+
+        # traverses all vertices in the graph
+        for _, vertex in self.vertices.items():
+            if vertex.color == VertexColor.WHITE:
+                self._dfs(vertex)
+
+    def _dfs(self, current: Vertex[T]) -> None:
+        """
+        Helper procedure for the recursive DFS algorithm.
+        """
+        current.start = time.time()
+        current.color = VertexColor.GRAY
+
+        for vertex in current.adjacent:
+            if vertex.color == VertexColor.WHITE:
+                vertex.parent = current
+                self._dfs(vertex)
+
+        current.color = VertexColor.BLACK
+        current.end = time.time()

@@ -1,21 +1,21 @@
 """
-Module with tests for undirected graphs.
+Module with tests for common graph algorithms.
 """
 import unittest
 
-from pystrukts.graphs.undirected import Edge
-from pystrukts.graphs.undirected import Graph
-from pystrukts.graphs.undirected import VertexColor
+from pystrukts.graphs import Edge
+from pystrukts.graphs import Graph
+from pystrukts.graphs import VertexColor
 
 
 class TestSuiteGraph(unittest.TestCase):
     """
-    Test suite for undirected graphs.
+    Test suite for common graph algorithms.
     """
 
-    def test_should_create_empty_undirected_graph(self):
+    def test_should_create_empty_graph(self):
         """
-        Should create an empty undirected graph.
+        Should create an empty graph.
         """
         # arrange and act
         g: Graph[str] = Graph()
@@ -26,9 +26,9 @@ class TestSuiteGraph(unittest.TestCase):
         self.assertEqual(g.total_vertices, 0)
         self.assertEqual(g.total_edges, 0)
 
-    def test_should_add_vertices_and_edges_to_undirected_graph(self):
+    def test_should_add_vertices_and_edges_to_graph(self):
         r"""
-        Should add vertices and edges to undirected graph:
+        Should add vertices and edges to an undirected graph:
 
            1
          /   \
@@ -98,6 +98,34 @@ class TestSuiteGraph(unittest.TestCase):
         self.assertEqual(vertex_1.distance, 0)
         self.assertEqual(vertex_2.distance, 1)
         self.assertEqual(vertex_3.distance, 1)
+
+        self.assertIsNone(vertex_1.parent)
+        self.assertEqual(vertex_2.parent, vertex_1)
+        self.assertEqual(vertex_3.parent, vertex_1)
+
+    def test_should_run_dfs_using_graph_1(self):
+        """
+        Should run DFS using graph 1.
+        """
+        # arrange
+        g = self.create_graph_1()
+        vertex_1 = g.get_vertex(1)
+
+        # act
+        g.dfs()
+
+        # assert
+        vertex_1 = g.get_vertex(1)
+        vertex_2 = g.get_vertex(2)
+        vertex_3 = g.get_vertex(3)
+
+        self.assertEqual(vertex_1.color, VertexColor.BLACK)
+        self.assertEqual(vertex_2.color, VertexColor.BLACK)
+        self.assertEqual(vertex_3.color, VertexColor.BLACK)
+
+        self.assertIsNone(vertex_1.parent)
+        self.assertEqual(vertex_2.parent, vertex_1)
+        self.assertEqual(vertex_3.parent, vertex_2)  # vertex_1 will be gray, so vertex_3's parent is vertex_1
 
     def create_graph_1(self) -> Graph[int]:
         r"""
