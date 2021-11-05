@@ -109,7 +109,6 @@ class TestSuiteGraph(unittest.TestCase):
         """
         # arrange
         g = self.create_graph_1()
-        vertex_1 = g.get_vertex(1)
 
         # act
         g.dfs()

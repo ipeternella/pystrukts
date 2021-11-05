@@ -162,8 +162,8 @@ class Graph(Generic[T]):
     def bfs(self, source: Vertex[T]) -> None:
         """
         Breadth-first (BFS) algorithm for traversing/exploring the graph from a given source vertex. If such source
-        is not found, it raises ValueError. Vertices that are not any path starting from the source vertex are not
-        traversed (unlike in DFS which uses several source vertices).
+        is not found, it raises ValueError. Vertices that are not on any path starting from the source vertex are not
+        traversed (unlike in DFS which may uses several source vertices).
         """
         if source.key not in self.vertices:
             raise ValueError(f"Vertice with key {source.key} was not found in the graph!")
@@ -195,10 +195,10 @@ class Graph(Generic[T]):
     def dfs(self) -> None:
         """
         Depth-first (DFS) algorithm for traversing the graph. Unlike BFS whose source vertex is fixed, DFS will
-        traverse all vertices so many sources can possibly be used in a way that even disconnected vertices or
-        parts of the graph will also be traversed.
+        traverse all vertices so many sources can possibly be used in a way that even disconnected vertices (or
+        disconnected parts of the graph) will be traversed.
         """
-        self.reset()
+        self.reset()  # reset graph's vertices back to their original state
 
         # traverses all vertices in the graph
         for _, vertex in self.vertices.items():
