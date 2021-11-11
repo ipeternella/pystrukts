@@ -33,7 +33,7 @@ class RodCuttingDynamicTestSuite(unittest.TestCase):
         """
         # arrange - large rod: 500 inches, for exemple
         length = 500
-        prices = range(0, 501)
+        prices = list(range(0, 501))
 
         # act
         max_revenue = cut_rod_max_revenue_memoized(length, prices)
@@ -47,7 +47,7 @@ class RodCuttingDynamicTestSuite(unittest.TestCase):
         """
         # arrange - large rod: 500 inches, for exemple
         length = 500
-        prices = range(0, 501)
+        prices = list(range(0, 501))
 
         # act
         max_revenue = cut_rod_max_revenue_bottomup(length, prices)
