@@ -2,7 +2,7 @@
 Module with a rot-cutting problem.
 
 Problem:
-    Computes the maximum revenue obtained by cutting up a rod of given length
+    Compute the maximum revenue obtained by cutting up a rod of given length
     and sellings its cut pieces based on the prices given by the prices argument.
     The rod can only be divided into integral pieces (integers), so min. length == 1.
     The prices list must be of size length + 1 (to include the price zero at ix == 0).
@@ -17,12 +17,18 @@ from typing import Dict
 from typing import List
 
 
+class PriceListLengthMismatch(Exception):
+    """
+    Raised when the prices list is too short for the given rod length.
+    """
+
+
 def cut_rod_max_revenue(length: int, prices: List[int]) -> int:
     """
     Naive/brute-force solution for the rod cutting problem.
     """
     if len(prices) < length + 1:
-        raise ValueError("Prices list is too short for the given rod length.")
+        raise PriceListLengthMismatch
 
     if length == 0:
         return prices[0]
@@ -43,7 +49,7 @@ def cut_rod_max_revenue_memoized(length: int, prices: List[int]) -> int:
     Optimized version of the cut_rod_max_revenue function using memoization (top-down approach).
     """
     if len(prices) < length + 1:
-        raise ValueError("Prices list is too short for the given rod length.")
+        raise PriceListLengthMismatch
 
     def cut_rot_helper(length: int, memory: Dict[int, int]) -> int:
         if length in memory:
@@ -73,7 +79,7 @@ def cut_rod_max_revenue_bottomup(length: int, prices: List[int]) -> int:
     Optimized version of the cut_rod_max_revenue using tabulation.
     """
     if len(prices) < length + 1:
-        raise ValueError("Prices list is too short for the given rod length.")
+        raise PriceListLengthMismatch
 
     solutions = [prices[0], prices[1]] + [0] * (length - 1)
 

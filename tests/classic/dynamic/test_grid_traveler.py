@@ -27,7 +27,7 @@ class DynamicGridTravelerTestSuite(unittest.TestCase):
         # assert
         self.assertEqual(amount_ways, 3)
 
-    def test_should_count_possible_ways_grid2D_memoized_on_18x18(self):
+    def test_should_count_ways_grid2d_memoized_on_18x18(self):
         """
         Should quickly compute possible ways for a large grid of 18x18 using memoized optimization.
         """
@@ -41,21 +41,7 @@ class DynamicGridTravelerTestSuite(unittest.TestCase):
         # assert
         self.assertEqual(amount_ways, 2333606220)
 
-    def test_should_count_possible_ways_grid2D_memoized_on_18x18(self):
-        """
-        Should quickly compute possible ways for a large grid of 18x18 using memoized optimization.
-        """
-        # arrange
-        m = 18
-        n = 18
-
-        # act
-        amount_ways = count_ways_grid2d_memoized(m, n)
-
-        # assert
-        self.assertEqual(amount_ways, 2333606220)
-
-    def test_should_count_possible_ways_grid2D_bottomup_on_18x18(self):
+    def test_should_count_ways_grid2d_bottomup_on_18x18(self):
         """
         Should quickly compute possible ways for a large grid of 18x18 using bottomup optimization.
         """
