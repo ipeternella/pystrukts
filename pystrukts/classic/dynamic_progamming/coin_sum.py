@@ -51,7 +51,7 @@ def minimize_coins_bottomup(target: int, coins: List[int]) -> int:
     for local_target in range(0, target + 1):
         for coin in coins:
 
-            if local_target - coin >= 0:
-                state[local_target] = min(state[local_target], state[local_target - coin] + 1)
+            if local_target + coin <= target:
+                state[local_target + coin] = min(state[local_target + coin], state[local_target] + 1)
 
     return state[target] if state[target] != INF else -1
