@@ -3,8 +3,8 @@ Module with tests for fibonacci computation problems.
 """
 import unittest
 
-from pystrukts.greedy.activity_selector import Activity
-from pystrukts.greedy.activity_selector import select_compatible_activities
+from pystrukts.classic.greedy.activity_selector import Activity
+from pystrukts.classic.greedy.activity_selector import select_compatible_activities
 
 
 class ActivitySelectorGreedyTestSuite(unittest.TestCase):

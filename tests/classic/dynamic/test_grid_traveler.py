@@ -3,8 +3,8 @@ Module with tests for grid traveler problems.
 """
 import unittest
 
-from pystrukts.dynamic.grid_traveler import count_possible_ways_grid2D_bruteforce
-from pystrukts.dynamic.grid_traveler import count_possible_ways_grid2D_memoized
+from pystrukts.classic.dynamic_progamming.grid_traveler import count_possible_ways_grid2D_bruteforce
+from pystrukts.classic.dynamic_progamming.grid_traveler import count_possible_ways_grid2D_memoized
 
 
 class DynamicGridTravelerTestSuite(unittest.TestCase):
