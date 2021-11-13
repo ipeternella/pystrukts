@@ -2,7 +2,6 @@
 Module with graph implementations.
 """
 from __future__ import annotations
-from __future__ import with_statement
 
 import sys
 import time
