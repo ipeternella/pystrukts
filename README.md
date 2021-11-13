@@ -15,7 +15,7 @@
   <img src="docs/pystrukts.png">
 </p>
 
-<h2 align="center">Some classical algorithms and data struktures in pure Python.</h2>
+<h2 align="center">Some classical algorithms and data structures in pure Python.</h2>
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@
 
 ## Pystrukts
 
-`Pystrukts` is a collection of classical algorithms and data struktures implementations written in Python. It's main objective is to contain easy to understand algorithms so that anyone can use its implementations for studying.
+`Pystrukts` is a collection of classical algorithms and data structures implementations written in Python. It's main objective is to contain easy to understand algorithms so that anyone can use its implementations for studying.
 
 ## Running Tests with Sonar
 
