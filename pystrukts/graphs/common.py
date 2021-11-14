@@ -166,7 +166,11 @@ class Graph(Generic[T]):
         weight = weight if self.weighted else None
         self.edges[(source, destination)] = Edge(source, destination, weight)
         self.vertices[source.key].adjacent.append(destination)
-        self.vertices[destination.key].adjacent.append(source)
+
+        # non-directed graphs allow both vertices to have each other on each adjacency list
+        # but for directed graphs only the source vertex should have the other vertex.
+        if not self.directed:
+            self.vertices[destination.key].adjacent.append(source)
 
     def relax(self, source: Vertex[T], dest: Vertex[T], weight: int) -> None:
         """

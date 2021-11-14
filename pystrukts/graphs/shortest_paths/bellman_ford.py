@@ -10,6 +10,9 @@ def bellman_ford(graph: Graph, source: Vertex) -> bool:
     Bellman-Ford algorithm for finding the shortest-path on a weighted and directed graph.
     Returns True if there are NO negative-weight cycles on the graph. Otherwise, returns False.
     """
+    if source.key not in graph.vertices:
+        raise ValueError(f"Source vertex: {source} not found in the graph!")
+
     graph.reset()
     source.distance = 0
 
