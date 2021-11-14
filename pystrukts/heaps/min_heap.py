@@ -9,6 +9,7 @@ from typing import Tuple
 
 from pystrukts._types.comparable import KT
 from pystrukts._types.comparable import VT
+from pystrukts.heaps.exceptions import EmptyHeap
 
 
 class MinHeap(Generic[KT, VT]):
@@ -52,7 +53,7 @@ class MinHeap(Generic[KT, VT]):
         size = len(self)
 
         if size == 0:
-            raise Exception("Empty heap!")
+            raise EmptyHeap("Empty heap!")
 
         value = self.heap[0][1]
 
@@ -69,10 +70,10 @@ class MinHeap(Generic[KT, VT]):
         used to insert new elements on the heap.
         """
         if len(self) == 0:
-            raise Exception("Cannot decrease key of an empty min heap!")
+            raise EmptyHeap("Cannot decrease key of an empty min heap!")
 
         if new_key > self.heap[i][0]:
-            raise Exception(f"New key: {new_key} is larger than old key: {self.heap[i][0]}")
+            raise ValueError(f"New key: {new_key} is larger than old key: {self.heap[i][0]}")
 
         # value i gets new key tuple
         self.heap[i] = (new_key, self.heap[i][1])

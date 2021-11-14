@@ -3,6 +3,7 @@ Module with tests for the min heap structure.
 """
 import unittest
 
+from pystrukts.heaps.exceptions import EmptyHeap
 from pystrukts.heaps.min_heap import MinHeap
 
 
@@ -78,7 +79,7 @@ class MinHeapTestSuite(unittest.TestCase):
         self.assertEqual(min_heap.extract_min(), "x")
         self.assertEqual(len(min_heap), 0)
 
-        self.assertRaises(Exception, min_heap.extract_min)
+        self.assertRaises(EmptyHeap, min_heap.extract_min)
 
         # act - re-insert values to the min heap
         min_heap.insert(7, "x")
@@ -96,4 +97,4 @@ class MinHeapTestSuite(unittest.TestCase):
         self.assertEqual(min_heap.extract_min(), "x")
 
         self.assertEqual(len(min_heap), 0)
-        self.assertRaises(Exception, min_heap.extract_min)
+        self.assertRaises(EmptyHeap, min_heap.extract_min)
