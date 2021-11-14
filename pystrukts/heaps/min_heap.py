@@ -4,6 +4,7 @@ Module with min heap implementation using lists (dynamic arrays).
 import math
 from typing import Generic
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 from pystrukts._types.comparable import KT
@@ -17,8 +18,11 @@ class MinHeap(Generic[KT, VT]):
 
     heap: List[Tuple[KT, VT]]
 
-    def __init__(self, elements: List[Tuple[KT, VT]]) -> None:
+    def __init__(self, elements: Optional[List[Tuple[KT, VT]]] = None) -> None:
         self.heap = []
+
+        if elements is None:
+            return
 
         for element in elements:
             if not isinstance(element, Tuple) and len(element) != 2:  # type: ignore

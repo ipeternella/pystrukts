@@ -27,6 +27,16 @@ class MinHeapTestSuite(unittest.TestCase):
         # act and assert
         self.assertRaises(ValueError, MinHeap, elements)
 
+    def test_should_build_min_heap_without_list(self):
+        """
+        Should build min heap without a starter list.
+        """
+        # act
+        min_heap: MinHeap[int, str] = MinHeap()
+
+        # assert
+        self.assertEqual(len(min_heap), 0)
+
     def test_should_build_min_heap_with_list(self):
         """
         Should build min heap with list.
