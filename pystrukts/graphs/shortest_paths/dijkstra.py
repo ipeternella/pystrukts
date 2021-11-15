@@ -18,7 +18,7 @@ def dijkstra(graph: Graph, source: Vertex) -> None:
     min_queue: MinPriorityQueue[Vertex] = MinPriorityQueue()
 
     graph.reset()
-    source.distance = 0  # all vertices being with INF distance, except the source
+    source.distance = 0  # all vertices begin with INF distance, except the source
 
     for vertex in graph.vertices.values():
         min_queue.enqueue(vertex.distance, vertex)
