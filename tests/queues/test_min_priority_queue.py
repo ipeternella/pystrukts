@@ -21,7 +21,7 @@ class MinPriorityQueueTestSuite(unittest.TestCase):
         # act
         q.enqueue(10, "x")
         q.enqueue(7, "i")
-        q.enqueue(7, "i")
+        q.enqueue(7, "w")
         q.enqueue(1, "z")
 
         # assert
@@ -35,7 +35,7 @@ class MinPriorityQueueTestSuite(unittest.TestCase):
         self.assertEqual(q.dequeue(), "i")
         self.assertEqual(len(q), 2)
 
-        self.assertEqual(q.dequeue(), "i")
+        self.assertEqual(q.dequeue(), "w")
         self.assertEqual(len(q), 1)
 
         self.assertEqual(q.dequeue(), "x")
@@ -57,3 +57,12 @@ class MinPriorityQueueTestSuite(unittest.TestCase):
         self.assertEqual(len(q), 0)
 
         self.assertIsNone(q.dequeue())
+
+        # act - enqueue more elements and then reduce priority
+        q.enqueue(5, "a")
+        q.enqueue(10, "b")
+        q.reduce_priority("b", 1)
+
+        # assert
+        self.assertEqual(q.dequeue(), "b")  # priority changed
+        self.assertEqual(q.dequeue(), "a")

@@ -2,6 +2,7 @@
 Module with min heap implementation using lists (dynamic arrays).
 """
 import math
+from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -10,17 +11,25 @@ from typing import Tuple
 from pystrukts._types.comparable import KT
 from pystrukts._types.comparable import VT
 from pystrukts.heaps.exceptions import EmptyHeap
+from pystrukts.heaps.exceptions import ValueAlreadyExistsOnHeap
 
 
 class MinHeap(Generic[KT, VT]):
     """
-    Represents a min heap of (key, value) elements.
+    Represents a min heap of (key, value) elements. The heap sustains a hashmap (dict) of handles
+    which allows O(1) look ups from a value to its heap array index position which can be used to
+    quickly update (decrease) a value's priority.
+
+    Notice, that value elements MUST be hashable for this implementation and the values MUST be unique
+    as the handles will not allow repeated values.
     """
 
     heap: List[Tuple[KT, VT]]
+    handles: Dict[VT, int]
 
     def __init__(self, elements: Optional[List[Tuple[KT, VT]]] = None) -> None:
         self.heap = []
+        self.handles = dict()
 
         if elements is None:
             return
@@ -42,6 +51,11 @@ class MinHeap(Generic[KT, VT]):
         Inserts a new (key, value) on the heap and corrects the heap list to maintain the min. heap
         property.
         """
+        if value in self.handles:
+            raise ValueAlreadyExistsOnHeap(
+                f"Value: {value} already exists on the heap and only unique values are allowed for handles!"
+            )
+
         self.heap.append((key, value))
         self.decrease_key(len(self) - 1, key)
 
@@ -56,9 +70,13 @@ class MinHeap(Generic[KT, VT]):
             raise EmptyHeap("Empty heap!")
 
         value = self.heap[0][1]
+        replace_value = self.heap[size - 1]
 
-        self.heap[0] = self.heap[size - 1]
+        self.heap[0] = replace_value
+        self.handles[replace_value[1]] = 0
+
         self.heap.pop()
+        self.handles.pop(value)
         self.min_heapify(0)
 
         return value
@@ -76,12 +94,26 @@ class MinHeap(Generic[KT, VT]):
             raise ValueError(f"New key: {new_key} is larger than old key: {self.heap[i][0]}")
 
         # value i gets new key tuple
-        self.heap[i] = (new_key, self.heap[i][1])
+        value = self.heap[i][1]
+        self.heap[i] = (new_key, value)
+        self.handles[self.heap[i][1]] = i
 
         # top-down
         while i > 0 and self.is_smaller_than_parent(i):
             self._swap(i, self.parent(i))
             i = self.parent(i)
+
+    def decrease_key_from_handle(self, value: VT, new_key: KT) -> None:
+        """
+        Decreases the key of the i-th heap element and goes top-down approach replacing smaller
+        children with their parent until the beginning of the heap is reached. This method is
+        used to insert new elements on the heap.
+        """
+        if value not in self.handles:
+            raise ValueError(f"Value: {value} not found in the heap!")
+
+        mapped_ix = self.handles[value]  # handle from value object to the heap element ix
+        self.decrease_key(mapped_ix, new_key)
 
     def min_heapify(self, parent_i: int) -> None:
         """
@@ -151,3 +183,6 @@ class MinHeap(Generic[KT, VT]):
 
         self.heap[ix_1] = self.heap[ix_2]
         self.heap[ix_2] = tmp
+
+        self.handles[tmp[1]] = ix_2
+        self.handles[self.heap[ix_1][1]] = ix_1
