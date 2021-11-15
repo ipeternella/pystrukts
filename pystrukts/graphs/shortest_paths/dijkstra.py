@@ -29,3 +29,6 @@ def dijkstra(graph: Graph, source: Vertex) -> None:
         for dest_vertex in min_distance_vertex.adjacent:
             edge = graph.get_edge(min_distance_vertex, dest_vertex)
             graph.relax(min_distance_vertex, dest_vertex, edge.weight)  # type: ignore
+
+            if min_queue.is_enqueued(dest_vertex):
+                min_queue.reduce_priority(dest_vertex, dest_vertex.distance)

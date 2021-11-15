@@ -26,10 +26,10 @@ class DijkstraShortestPathsTestSuite(unittest.TestCase):
 
         # assert
         self.assertEqual(g.get_vertex("s").distance, 0)
-        self.assertEqual(g.get_vertex("t").distance, 3)
+        self.assertEqual(g.get_vertex("t").distance, 8)
         self.assertEqual(g.get_vertex("x").distance, 9)
         self.assertEqual(g.get_vertex("y").distance, 5)
-        self.assertEqual(g.get_vertex("z").distance, 11)
+        self.assertEqual(g.get_vertex("z").distance, 7)
 
     def build_weighted_and_directed_graph_1(self) -> Graph[str]:
         g: Graph[str] = Graph(directed=True, weighted=True)
@@ -40,15 +40,15 @@ class DijkstraShortestPathsTestSuite(unittest.TestCase):
         y = g.add_vertex("y")
         z = g.add_vertex("z")
 
-        g.add_edge(s, t, 3)
-        g.add_edge(t, x, 6)
+        g.add_edge(s, t, 10)
+        g.add_edge(t, x, 1)
         g.add_edge(t, y, 2)
-        g.add_edge(y, t, 1)
+        g.add_edge(y, t, 3)
         g.add_edge(s, y, 5)
-        g.add_edge(x, z, 2)
-        g.add_edge(z, x, 7)
-        g.add_edge(y, z, 6)
-        g.add_edge(y, x, 4)
-        g.add_edge(z, s, 3)
+        g.add_edge(x, z, 4)
+        g.add_edge(z, x, 6)
+        g.add_edge(y, z, 2)
+        g.add_edge(y, x, 9)
+        g.add_edge(z, s, 7)
 
         return g
