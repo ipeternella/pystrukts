@@ -64,6 +64,9 @@ class Vertex(Generic[T]):
     def __repr__(self) -> str:
         return f"<Vertex: {self.key}, color: {self.color}>"
 
+    def __hash__(self) -> int:
+        return hash(self.key)
+
 
 @dataclass
 class Edge(Generic[T]):
