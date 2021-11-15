@@ -39,7 +39,7 @@ class MinPriorityQueue(Generic[T]):
         """
         Adds a new key/value to the queue.
         """
-        self._min_heap.insert(priority, value)  # how to map ix changes?
+        self._min_heap.insert(priority, value)
 
     def dequeue(self) -> Optional[T]:
         """
