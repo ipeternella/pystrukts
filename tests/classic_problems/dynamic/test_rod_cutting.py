@@ -3,9 +3,9 @@ Module with tests for the rod cutting problem.
 """
 import unittest
 
-from pystrukts.classic.dynamic_progamming.rod_cutting import cut_rod_max_revenue
-from pystrukts.classic.dynamic_progamming.rod_cutting import cut_rod_max_revenue_bottomup
-from pystrukts.classic.dynamic_progamming.rod_cutting import cut_rod_max_revenue_memoized
+from pystrukts.classic_problems.dynamic.rod_cutting import cut_rod_max_revenue
+from pystrukts.classic_problems.dynamic.rod_cutting import cut_rod_max_revenue_bottomup
+from pystrukts.classic_problems.dynamic.rod_cutting import cut_rod_max_revenue_memoized
 
 
 class RodCuttingDynamicTestSuite(unittest.TestCase):

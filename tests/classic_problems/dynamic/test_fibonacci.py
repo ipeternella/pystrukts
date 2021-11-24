@@ -3,9 +3,9 @@ Module with tests for fibonacci computation problems.
 """
 import unittest
 
-from pystrukts.classic.dynamic_progamming.fibonacci import fibonacci_bottomup
-from pystrukts.classic.dynamic_progamming.fibonacci import fibonacci_bruteforce
-from pystrukts.classic.dynamic_progamming.fibonacci import fibonacci_memoized
+from pystrukts.classic_problems.dynamic.fibonacci import fibonacci_bottomup
+from pystrukts.classic_problems.dynamic.fibonacci import fibonacci_bruteforce
+from pystrukts.classic_problems.dynamic.fibonacci import fibonacci_memoized
 
 
 class DynamicFibonacciTestSuite(unittest.TestCase):

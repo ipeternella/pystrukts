@@ -4,9 +4,9 @@ Module with tests for the classic max subarray problem algorithms.
 import unittest
 from typing import List
 
-from pystrukts.classic.max_subarray_sum import max_subarray_sum
-from pystrukts.classic.max_subarray_sum import max_subarray_sum_ii
-from pystrukts.classic.max_subarray_sum import max_subarray_sum_iii
+from pystrukts.classic_problems.max_subarray_sum import max_subarray_sum
+from pystrukts.classic_problems.max_subarray_sum import max_subarray_sum_ii
+from pystrukts.classic_problems.max_subarray_sum import max_subarray_sum_iii
 
 
 class ClassicMaxSubArrayTestSuite(unittest.TestCase):
