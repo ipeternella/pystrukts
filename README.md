@@ -1,17 +1,6 @@
 <h1 align="center">Pystrukts!</h1>
 
 <p align="center">
-  <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
-  <img alt="Quality Gate Status" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=alert_status">
-  <img alt="Maintainability Rating" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=sqale_rating">
-  <img alt="Security Rating" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=security_rating">
-  <img alt="Reliability Rating" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=reliability_rating">
-  <img alt="Coverage" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=coverage">
-  <img alt="Bugs" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=bugs">
-  <img alt="Technical Debt" src="https://sonarcloud.io/api/project_badges/measure?project=pystrukts&metric=sqale_index">
-</p>
-
-<p align="center">
   <img src="docs/pystrukts.png">
 </p>
 
